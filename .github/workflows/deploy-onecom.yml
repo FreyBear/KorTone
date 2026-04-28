@@ -44,10 +44,11 @@ jobs:
           else
             echo "✓ NEXT_PUBLIC_SUPABASE_URL is set"
           fi
-          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" ]; then
-            echo "ERROR: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is not set!"
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" ]; then
+            echo "⚠️  WARNING: NEXT_PUBLIC_SUPABASE_ANON_KEY is not set!"
+            echo "Using PUBLISHABLE_KEY as fallback (may not work for auth)"
           else
-            echo "✓ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is set"
+            echo "✓ NEXT_PUBLIC_SUPABASE_ANON_KEY is set (recommended)"
           fi
 
       - name: Build static site
