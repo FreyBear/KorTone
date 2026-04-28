@@ -18,7 +18,7 @@ create table if not exists public.songs (
 
 create table if not exists public.user_roles (
   user_id uuid primary key references auth.users(id) on delete cascade,
-  role text not null check (role in ('admin')),
+  role text not null check (role in ('admin', 'editor')),
   created_at timestamptz not null default now()
 );
 

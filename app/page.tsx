@@ -7,6 +7,8 @@ import { SongCard } from '@/components/SongCard';
 import { SoundModeSelect } from '@/components/SoundModeSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TuningForkFab } from '@/components/TuningForkFab';
+import { AdminPanel } from '@/components/AdminPanel';
+import { Shield } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
 import { setSoundMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
@@ -21,6 +23,8 @@ export default function Home() {
   const [status, setStatus] = useState('Demo-data aktiv.');
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canEdit, setCanEdit] = useState(false);
+  const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [soundMode, setSoundModeState] = useState<SoundMode>('piano');
 
@@ -105,24 +109,30 @@ export default function Home() {
       const currentSession = data?.session || null;
       setSession(currentSession);
 
-      // Check if user is admin
+      // Check user permissions
       if (currentSession) {
         const { data: adminCheck } = await supabase.rpc('is_admin');
+        const { data: canEditCheck } = await supabase.rpc('can_edit_songs');
         setIsAdmin(adminCheck === true);
+        setCanEdit(canEditCheck === true);
       } else {
         setIsAdmin(false);
+        setCanEdit(false);
       }
 
       // Listen for auth changes
       const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
         setSession(session);
         
-        // Re-check admin status
+        // Re-check permissions
         if (session) {
           const { data: adminCheck } = await supabase.rpc('is_admin');
+          const { data: canEditCheck } = await supabase.rpc('can_edit_songs');
           setIsAdmin(adminCheck === true);
+          setCanEdit(canEditCheck === true);
         } else {
           setIsAdmin(false);
+          setCanEdit(false);
         }
       });
 
@@ -204,6 +214,16 @@ export default function Home() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          {mounted && isAdmin && (
+            <button
+              onClick={() => setAdminPanelOpen(true)}
+              className="flex items-center gap-1 rounded-lg bg-purple-100 px-3 py-1.5 text-sm font-medium text-purple-700 transition hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"
+              title="Brukerhåndtering"
+            >
+              <Shield size={16} />
+              Admin
+            </button>
+          )}
           <SoundModeSelect value={soundMode} onChange={setSoundModeState} />
           <ThemeToggle />
         </div>
@@ -213,11 +233,12 @@ export default function Home() {
 
       <section className="space-y-3 px-4 pt-4">
         {filteredSongs.map((song) => (
-          <SongCard key={song.id} song={song} isAdmin={isAdmin} onSongUpdated={reloadSongs} />
+          <SongCard key={song.id} song={song} isAdmin={canEdit} onSongUpdated={reloadSongs} />
         ))}
       </section>
 
       <TuningForkFab />
+      <AdminPanel isOpen={adminPanelOpen} onClose={() => setAdminPanelOpen(false)} />
     </main>
   );
 }
