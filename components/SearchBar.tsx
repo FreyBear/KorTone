@@ -10,7 +10,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder="Sok i tittel, kallenavn eller tekst"
-        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-indigo-600 transition focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50"
+        className="w-full rounded-xl bg-white px-4 py-3 text-sm text-slate-900 outline-none ring-indigo-600 transition focus:ring-2 dark:bg-slate-900 dark:text-slate-50"
       />
     </div>
   );
