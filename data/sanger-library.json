@@ -1,0 +1,866 @@
+{
+  "songs": [
+    {
+      "id": "song_01",
+      "title": "Helan",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4",
+        "A": "C4",
+        "T": "F4",
+        "B": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_02",
+      "title": "Helan går",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_03",
+      "title": "Halvan",
+      "nickname": "Ess-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "E4",
+        "A": "Bb4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_04",
+      "title": "Tersen",
+      "nickname": "B-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "D4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_05a",
+      "title": "Finsk snapsvise",
+      "nickname": "c-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_05b",
+      "title": "Kvarten",
+      "nickname": "C-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4",
+        "A": "G4",
+        "T": "C4",
+        "B": "E4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_06",
+      "title": "Vackra Kvarten",
+      "nickname": "B-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "D4",
+        "A": "Bb4",
+        "T": "D4",
+        "B": "Bb4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_07",
+      "title": "Kvinten",
+      "nickname": "f-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_08",
+      "title": "Seksten",
+      "nickname": "B-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "F4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_09",
+      "title": "Låt oss dricka",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_10",
+      "title": "Sangerhilsen",
+      "nickname": "A-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_11",
+      "title": "Gaudeamus Igitur",
+      "nickname": "B-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "Bb4",
+        "A": "F4",
+        "T": "D4",
+        "B": "Bb4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_12",
+      "title": "Studentsång",
+      "nickname": "C-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4",
+        "A": "E4",
+        "T": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_13",
+      "title": "Slutkör",
+      "nickname": "G-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4",
+        "A": "D4",
+        "T": "B4",
+        "B": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_14",
+      "title": "Tourdion",
+      "nickname": "e-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4",
+        "A": "B4",
+        "T": "G4",
+        "B": "E4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_15",
+      "title": "Das Königslied",
+      "nickname": "D-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_16",
+      "title": "Jubileumskantate",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "F4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_17",
+      "title": "Till Österland",
+      "nickname": "h-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "F#4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_18",
+      "title": "Akademisk bordvers",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [],
+      "pitches": {
+        "S": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_19",
+      "title": "Ja, dette skal være",
+      "nickname": "G-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [],
+      "pitches": {
+        "S": "D4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_20",
+      "title": "Champagnegaloppen",
+      "nickname": "C-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_21",
+      "title": "Java Jive",
+      "nickname": "G-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4",
+        "A": "D4",
+        "T": "E4",
+        "B": "D4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_22",
+      "title": "Rom og Coca Cola",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4",
+        "A": "F4",
+        "T": "D4",
+        "B": "F4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_23",
+      "title": "Løft ditt glass",
+      "nickname": "C-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4",
+        "A": "G4",
+        "T": "E4",
+        "B": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_24",
+      "title": "Stormfokken",
+      "nickname": "D-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "D4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_25",
+      "title": "Psildesangen",
+      "nickname": "g-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4",
+        "A": "D4",
+        "T": "B4",
+        "B": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_26",
+      "title": "Århus Tappenstrek",
+      "nickname": "Ess-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "Bb4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_27",
+      "title": "Fredmans Epistel No. 13",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "F4",
+        "A": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_28",
+      "title": "Fredmans Epistel No. 9",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "B"
+      ],
+      "pitches": {
+        "S": "F4",
+        "A": "A4",
+        "T": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_29",
+      "title": "Metsämiehen juomalaulu",
+      "nickname": "D-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_30",
+      "title": "Bort allt vad oro gör",
+      "nickname": "C-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_31",
+      "title": "Ölvisa",
+      "nickname": "G-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "D4",
+        "A": "A4",
+        "T": "C4",
+        "B": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_32",
+      "title": "Vals",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "F4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_33",
+      "title": "Aquaviten",
+      "nickname": "G-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4",
+        "A": "B4",
+        "T": "D4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_34",
+      "title": "Påls fuge",
+      "nickname": "B-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "B"
+      ],
+      "pitches": {
+        "S": "Bb4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_35",
+      "title": "Bruremarsj, Førde",
+      "nickname": "Ass-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "E4",
+        "A": "C4",
+        "T": "Db4",
+        "B": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_36",
+      "title": "Trilo",
+      "nickname": "D-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4",
+        "A": "D4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_37",
+      "title": "Sånn e det altså med det",
+      "nickname": "c-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A",
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4",
+        "A": "E4",
+        "T": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_d01",
+      "title": "Honung",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A"
+      ],
+      "pitches": {
+        "S": "F4",
+        "A": "A4",
+        "T": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_d02",
+      "title": "Vise for gærne jinter",
+      "nickname": "D-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A"
+      ],
+      "pitches": {
+        "S": "F#4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_d03",
+      "title": "The Big Spoon",
+      "nickname": "Ess-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A"
+      ],
+      "pitches": {
+        "S": "E4",
+        "A": "Bb4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_d04",
+      "title": "Tonight you belong to me",
+      "nickname": "A-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A"
+      ],
+      "pitches": {
+        "S": "E4",
+        "A": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_d05",
+      "title": "Vänta inte med att sjunga",
+      "nickname": "e-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A"
+      ],
+      "pitches": {
+        "S": "E4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_d06",
+      "title": "Hvem styrde hit din väg?",
+      "nickname": "A-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "S",
+        "A"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m01",
+      "title": "Kristallen",
+      "nickname": "a-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m02",
+      "title": "Hej, dunkom",
+      "nickname": "ass-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4",
+        "A": "B3",
+        "T": "E4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m03",
+      "title": "Gammelt Øl",
+      "nickname": "D-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "A4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m04",
+      "title": "Sit on my face",
+      "nickname": "F-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4",
+        "A": "D4",
+        "T": "E4",
+        "B": "F4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m05",
+      "title": "Olav Trygvason",
+      "nickname": "f-moll",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m06",
+      "title": "Gambrinus-visen",
+      "nickname": "C-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "G4"
+      },
+      "dropbox_url": null
+    },
+    {
+      "id": "song_m07",
+      "title": "Ronjalåt",
+      "nickname": "B-dur",
+      "lyrics_snippet": null,
+      "tempo_bpm": null,
+      "sequence": [
+        "T",
+        "B"
+      ],
+      "pitches": {
+        "S": "C4",
+        "A": "F4",
+        "T": "A4"
+      },
+      "dropbox_url": null
+    }
+  ],
+  "meta": {
+    "count": 51,
+    "source": "sanger.csv",
+    "converted": "2026-04-28T14:07:03.714Z"
+  }
+}
