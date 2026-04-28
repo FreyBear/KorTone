@@ -95,10 +95,6 @@ export function SongCard({ song }: SongCardProps) {
           {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
         </button>
       </div>
-
-      <p className="mt-3 min-h-5 text-xs font-medium text-emerald-700 dark:text-emerald-300" aria-live="polite">
-        {activeVoice ? `Spiller na: ${activeVoice}` : '\u00a0'}
-      </p>
     </article>
   );
 }
