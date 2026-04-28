@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { LogIn } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function SignInButton() {
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
+    if (!supabase) {
+      console.error('Supabase is not configured.');
+      return;
+    }
+
     setLoading(true);
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || ''
-    );
 
     try {
       await supabase.auth.signInWithOAuth({

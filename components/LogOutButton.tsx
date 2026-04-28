@@ -2,19 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 import { LogOut } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function LogOutButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogOut = async () => {
+    if (!supabase) {
+      console.error('Supabase is not configured.');
+      return;
+    }
+
     setLoading(true);
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || ''
-    );
 
     try {
       await supabase.auth.signOut();
