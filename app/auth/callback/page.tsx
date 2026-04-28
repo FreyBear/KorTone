@@ -9,11 +9,13 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
+      console.log('[AUTH CALLBACK] Starting...');
+      
       const supabase = getSupabase();
       
       if (!supabase) {
-        console.error('Supabase not available');
-        router.push('/');
+        console.error('[AUTH CALLBACK] Supabase not available');
+        window.location.href = '/';
         return;
       }
 
@@ -22,33 +24,41 @@ export default function AuthCallback() {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         
-        console.log('Auth callback - has access token:', !!accessToken);
+        console.log('[AUTH CALLBACK] Access token present:', !!accessToken);
 
         if (accessToken) {
           // We have OAuth tokens in the URL, Supabase will handle them automatically
-          // Just wait a bit for Supabase to process
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Wait for Supabase to process
+          console.log('[AUTH CALLBACK] Waiting for Supabase to process tokens...');
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
 
         // Now check session
         const { data, error } = await supabase.auth.getSession();
 
-        console.log('Session check:', { 
+        console.log('[AUTH CALLBACK] Session check:', { 
           hasSession: !!data?.session, 
-          error: error?.message 
+          error: error?.message,
+          userEmail: data?.session?.user?.email
         });
 
         if (error) {
-          console.error('Auth callback error:', error);
+          console.error('[AUTH CALLBACK] Error:', error);
         }
 
-        // Always redirect to home, whether we have a session or not
-        console.log('Redirecting to home...');
+        // Always redirect to home
+        console.log('[AUTH CALLBACK] Redirecting to home...');
         
-        // Use window.location for more reliable redirect in static export
+        // Set a fallback timeout
+        setTimeout(() => {
+          console.log('[AUTH CALLBACK] Fallback redirect executing...');
+          window.location.href = '/';
+        }, 1000);
+        
+        // Try immediate redirect
         window.location.href = '/';
       } catch (err) {
-        console.error('Callback handling error:', err);
+        console.error('[AUTH CALLBACK] Exception:', err);
         window.location.href = '/';
       }
     };
@@ -57,8 +67,10 @@ export default function AuthCallback() {
   }, [router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       <p className="text-slate-600">Logging in...</p>
+      <p className="text-xs text-slate-400">Processing authentication...</p>
     </div>
   );
 }
