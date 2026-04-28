@@ -3,6 +3,18 @@ DirectoryIndex index.html
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 	
+	# Serve .html files for routes without extension
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME}.html -f
+	RewriteRule ^(.*)$ $1.html [L]
+	
+	# Serve index.html for directories
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_FILENAME}/index.html -f
+	RewriteRule ^(.*)$ $1/index.html [L]
+	
 	# Serve index.html for root without redirect
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
