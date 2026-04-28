@@ -35,6 +35,21 @@ jobs:
         if: steps.preflight.outputs.ready == 'true'
         run: npm ci
 
+      - name: Debug environment variables
+        if: steps.preflight.outputs.ready == 'true'
+        run: |
+          echo "Checking if Supabase secrets are set..."
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" ]; then
+            echo "ERROR: NEXT_PUBLIC_SUPABASE_URL is not set!"
+          else
+            echo "✓ NEXT_PUBLIC_SUPABASE_URL is set"
+          fi
+          if [ -z "${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}" ]; then
+            echo "ERROR: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is not set!"
+          else
+            echo "✓ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is set"
+          fi
+
       - name: Build static site
         if: steps.preflight.outputs.ready == 'true'
         env:
@@ -42,6 +57,17 @@ jobs:
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
+
+      - name: Verify Supabase config in build
+        if: steps.preflight.outputs.ready == 'true'
+        run: |
+          echo "Verifying if Supabase URL is in built files..."
+          if grep -r "supabase.co" out/ > /dev/null 2>&1; then
+            echo "✓ Supabase URL found in build output"
+          else
+            echo "⚠️  WARNING: Supabase URL NOT found in build output!"
+            echo "This means environment variables were not baked in during build."
+          fi
 
       - name: Install SSH deploy tooling
         if: steps.preflight.outputs.ready == 'true'
