@@ -18,10 +18,17 @@ export default function SignInButton() {
     setLoading(true);
 
     try {
+      // Use actual window origin at runtime to ensure correct redirect
+      const redirectUrl = typeof window !== 'undefined' 
+        ? `${window.location.origin}/auth/callback`
+        : '/auth/callback';
+      
+      console.log('Redirecting to:', redirectUrl);
+      
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
         },
       });
     } catch (error) {
