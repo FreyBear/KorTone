@@ -26,12 +26,27 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
   if (!isAdmin) return null;
 
+  function handleOpen() {
+    // Reset form data to current song values when opening
+    setFormData({
+      title: song.title,
+      nickname: song.nickname || '',
+      voices: song.voices,
+      sequence: song.sequence.join(' '),
+      key_signature: song.key_signature || '',
+      tempo_bpm: song.tempo_bpm,
+      pitches: JSON.stringify(song.pitches, null, 2),
+    });
+    setIsOpen(true);
+  }
+
   async function handleSave() {
     setIsSaving(true);
     try {
       const supabase = getSupabase();
       if (!supabase) {
         alert('Ingen Supabase-tilkobling');
+        setIsSaving(false);
         return;
       }
 
@@ -63,12 +78,18 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
       if (error) {
         console.error('Feil ved oppdatering:', error);
-        alert(`Kunne ikke lagre: ${error.message}`);
+        alert(`❌ Kunne ikke lagre: ${error.message}`);
+        setIsSaving(false);
       } else {
+        // Success!
+        console.log('✅ Song updated successfully');
+        setIsSaving(false);
         setIsOpen(false);
-        onSongUpdated();
+        await onSongUpdated();
       }
-    } finally {
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('En uventet feil oppstod. Se konsollen for detaljer.');
       setIsSaving(false);
     }
   }
@@ -77,7 +98,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={handleOpen}
         className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400"
         title="Rediger sang"
       >

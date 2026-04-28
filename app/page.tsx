@@ -73,15 +73,22 @@ export default function Home() {
 
   // Reload function that can be called after updating songs
   async function reloadSongs() {
+    console.log('[reloadSongs] Starting reload...');
     const supabase = getSupabase();
-    if (!supabase) return;
+    if (!supabase) {
+      console.error('[reloadSongs] No Supabase client');
+      return;
+    }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('songs')
       .select('id,title,nickname,voices,sequence,pitches,key_signature,tempo_bpm')
       .order('title', { ascending: true });
 
-    if (data) {
+    if (error) {
+      console.error('[reloadSongs] Error fetching songs:', error);
+    } else if (data) {
+      console.log('[reloadSongs] Successfully loaded', data.length, 'songs');
       setSongs(data as Song[]);
     }
   }
