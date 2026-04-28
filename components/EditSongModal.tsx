@@ -11,6 +11,20 @@ type EditSongModalProps = {
   onSongUpdated: () => void;
 };
 
+// Helper: Sort pitches in musical order (S, A, T, B)
+function sortPitches(pitches: Partial<Record<Voice, string>>): string {
+  const voiceOrder: Voice[] = ['S', 'A', 'T', 'B'];
+  const sorted: Partial<Record<Voice, string>> = {};
+  
+  voiceOrder.forEach(voice => {
+    if (pitches[voice] !== undefined) {
+      sorted[voice] = pitches[voice];
+    }
+  });
+  
+  return JSON.stringify(sorted, null, 2);
+}
+
 export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -21,7 +35,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     sequence: song.sequence.join(' '),
     key_signature: song.key_signature || '',
     tempo_bpm: song.tempo_bpm,
-    pitches: JSON.stringify(song.pitches, null, 2),
+    pitches: sortPitches(song.pitches),
   });
 
   if (!isAdmin) return null;
@@ -35,7 +49,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
       sequence: song.sequence.join(' '),
       key_signature: song.key_signature || '',
       tempo_bpm: song.tempo_bpm,
-      pitches: JSON.stringify(song.pitches, null, 2),
+      pitches: sortPitches(song.pitches),
     });
     setIsOpen(true);
   }
