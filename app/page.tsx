@@ -52,7 +52,7 @@ export default function Home() {
 
       const { data, error } = await supabase
         .from('songs')
-        .select('id,title,voices,sequence,pitches,key_signature,tempo_bpm')
+        .select('id,title,nickname,voices,sequence,pitches,key_signature,tempo_bpm')
         .order('title', { ascending: true });
 
       if (error) {
@@ -78,7 +78,7 @@ export default function Home() {
 
     const { data } = await supabase
       .from('songs')
-      .select('id,title,voices,sequence,pitches,key_signature,tempo_bpm')
+      .select('id,title,nickname,voices,sequence,pitches,key_signature,tempo_bpm')
       .order('title', { ascending: true });
 
     if (data) {
@@ -130,7 +130,7 @@ export default function Home() {
   const fuse = useMemo(
     () =>
       new Fuse(songs, {
-        keys: ['title', 'voices', 'key_signature'],
+        keys: ['title', 'nickname', 'voices', 'key_signature'],
         threshold: 0.32,
         ignoreLocation: true,
       }),

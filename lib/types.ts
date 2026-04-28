@@ -5,6 +5,7 @@ export type VoiceArrangement = 'SATB' | 'TTBB' | 'Unison' | string;
 export type Song = {
   id: string;
   title: string;
+  nickname: string | null;
   voices: VoiceArrangement;
   sequence: string[];  // Array of note names like ["A", "F", "A", "F"]
   pitches: Partial<Record<Voice, string>>;  // Map of voice to pitch

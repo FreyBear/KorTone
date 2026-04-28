@@ -16,6 +16,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
     title: song.title,
+    nickname: song.nickname || '',
     voices: song.voices,
     sequence: song.sequence.join(' '),
     key_signature: song.key_signature || '',
@@ -51,6 +52,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
         .from('songs')
         .update({
           title: formData.title,
+          nickname: formData.nickname || null,
           voices: formData.voices,
           sequence: sequenceArray,
           pitches: pitchesObj,
@@ -108,6 +110,19 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Kallenavn <span className="text-xs text-slate-500">(søkbart, men vises ikke)</span>
+                </label>
+                <input
+                  type="text"
+                  value={formData.nickname}
+                  onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  placeholder="F.eks. alternativt navn eller søkeord"
                 />
               </div>
 
