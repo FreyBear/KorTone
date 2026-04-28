@@ -75,15 +75,24 @@ export async function playVoice(
 export async function playSequence(
   sequence: Voice[],
   pitches: Partial<Record<Voice, string>>,
-  tempoBpm?: number | null
+  tempoBpm?: number | null,
+  options?: {
+    onVoiceStart?: (voice: Voice) => void;
+    onComplete?: () => void;
+  }
 ): Promise<void> {
   await primeAudioContext();
 
   const stepMs = tempoBpm && tempoBpm > 0 ? Math.round((60_000 / tempoBpm) * 0.8) : 520;
 
-  for (const voice of sequence) {
-    await playVoice(voice, pitches[voice], '8n');
-    await new Promise((resolve) => setTimeout(resolve, stepMs));
+  try {
+    for (const voice of sequence) {
+      options?.onVoiceStart?.(voice);
+      await playVoice(voice, pitches[voice], '8n');
+      await new Promise((resolve) => setTimeout(resolve, stepMs));
+    }
+  } finally {
+    options?.onComplete?.();
   }
 }
 
