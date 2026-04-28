@@ -7,8 +7,6 @@ import { SongCard } from '@/components/SongCard';
 import { SoundModeSelect } from '@/components/SoundModeSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TuningForkFab } from '@/components/TuningForkFab';
-import SignInButton from '@/components/SignInButton';
-import LogOutButton from '@/components/LogOutButton';
 import type { Session } from '@supabase/supabase-js';
 import { setSoundMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
@@ -119,12 +117,55 @@ export default function Home() {
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-indigo-600">KorTone</p>
           <h1 className="text-2xl font-bold">Digital stemmegaffel</h1>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{status}</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {status}
+            {mounted && (
+              <>
+                {' · '}
+                {session ? (
+                  <>
+                    <span className="text-slate-600 dark:text-slate-300">
+                      {session.user.email}
+                    </span>
+                    {' · '}
+                    <button
+                      onClick={async () => {
+                        const supabase = getSupabase();
+                        if (supabase) {
+                          await supabase.auth.signOut();
+                          window.location.reload();
+                        }
+                      }}
+                      className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
+                    >
+                      logg ut
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={async () => {
+                      const supabase = getSupabase();
+                      if (supabase) {
+                        await supabase.auth.signInWithOAuth({
+                          provider: 'google',
+                          options: {
+                            redirectTo: `${window.location.origin}/auth/callback`,
+                          },
+                        });
+                      }
+                    }}
+                    className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
+                  >
+                    logg inn
+                  </button>
+                )}
+              </>
+            )}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <SoundModeSelect value={soundMode} onChange={setSoundModeState} />
           <ThemeToggle />
-          {mounted && (session ? <LogOutButton /> : <SignInButton />)}
         </div>
       </header>
 
