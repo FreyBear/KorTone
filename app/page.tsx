@@ -4,16 +4,37 @@ import Fuse from 'fuse.js';
 import { useEffect, useMemo, useState } from 'react';
 import { SearchBar } from '@/components/SearchBar';
 import { SongCard } from '@/components/SongCard';
+import { SoundModeSelect } from '@/components/SoundModeSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TuningForkFab } from '@/components/TuningForkFab';
+import { setSoundMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
 import { hasSupabaseEnv, supabase } from '@/lib/supabase';
-import type { Song } from '@/lib/types';
+import type { Song, SoundMode } from '@/lib/types';
+
+const soundStorageKey = 'kortone-sound-mode';
 
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>(fallbackSongs);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('Demo-data aktiv.');
+  const [soundMode, setSoundModeState] = useState<SoundMode>(() => {
+    if (typeof window === 'undefined') {
+      return 'piano';
+    }
+
+    const saved = window.localStorage.getItem(soundStorageKey);
+    if (saved === 'piano' || saved === 'sine' || saved === 'flute') {
+      return saved;
+    }
+
+    return 'piano';
+  });
+
+  useEffect(() => {
+    setSoundMode(soundMode);
+    window.localStorage.setItem(soundStorageKey, soundMode);
+  }, [soundMode]);
 
   useEffect(() => {
     async function loadSongs() {
@@ -68,7 +89,10 @@ export default function Home() {
           <h1 className="text-2xl font-bold">Digital stemmegaffel</h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{status}</p>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <SoundModeSelect value={soundMode} onChange={setSoundModeState} />
+          <ThemeToggle />
+        </div>
       </header>
 
       <SearchBar value={query} onChange={setQuery} />

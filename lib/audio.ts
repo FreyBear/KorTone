@@ -1,4 +1,4 @@
-import type { Voice } from '@/lib/types';
+import type { SoundMode, Voice } from '@/lib/types';
 
 const voiceMidi: Record<Voice, number> = {
   S: 64,
@@ -10,7 +10,16 @@ const voiceMidi: Record<Voice, number> = {
 type ToneModule = typeof import('tone');
 
 let tonePromise: Promise<ToneModule> | null = null;
-let synthPromise: Promise<any> | null = null;
+let currentSoundMode: SoundMode = 'piano';
+const synthPromises: Partial<Record<SoundMode, Promise<any>>> = {};
+
+export function getSoundMode(): SoundMode {
+  return currentSoundMode;
+}
+
+export function setSoundMode(mode: SoundMode): void {
+  currentSoundMode = mode;
+}
 
 function ensureBrowser(): void {
   if (typeof window === 'undefined') {
@@ -26,16 +35,38 @@ async function getTone(): Promise<ToneModule> {
   return tonePromise;
 }
 
-async function getSynth() {
-  if (!synthPromise) {
-    synthPromise = getTone().then((Tone) =>
-      new Tone.PolySynth(Tone.Synth, {
-        oscillator: { type: 'triangle' },
-        envelope: { attack: 0.02, decay: 0.15, sustain: 0.35, release: 0.8 },
-      }).toDestination()
-    );
+async function createSynth(mode: SoundMode) {
+  const Tone = await getTone();
+
+  if (mode === 'sine') {
+    return new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.01, decay: 0.12, sustain: 0.5, release: 0.25 },
+    }).toDestination();
   }
-  return synthPromise;
+
+  if (mode === 'flute') {
+    return new Tone.PolySynth(Tone.AMSynth, {
+      harmonicity: 1.8,
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.03, decay: 0.1, sustain: 0.9, release: 0.7 },
+      modulation: { type: 'triangle' },
+      modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.35, release: 0.6 },
+    }).toDestination();
+  }
+
+  return new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.01, decay: 0.3, sustain: 0.2, release: 1.2 },
+  }).toDestination();
+}
+
+async function getSynth() {
+  const mode = currentSoundMode;
+  if (!synthPromises[mode]) {
+    synthPromises[mode] = createSynth(mode);
+  }
+  return synthPromises[mode];
 }
 
 async function toNote(value: string | undefined, fallbackMidi: number): Promise<string> {
