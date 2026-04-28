@@ -23,21 +23,18 @@ export default function Home() {
   const [status, setStatus] = useState('Demo-data aktiv.');
   const [session, setSession] = useState<Session | null>(null);
   const [mounted, setMounted] = useState(false);
-  const [soundMode, setSoundModeState] = useState<SoundMode>(() => {
-    if (typeof window === 'undefined') {
-      return 'piano';
-    }
-
-    const saved = window.localStorage.getItem(soundStorageKey);
-    if (saved === 'piano' || saved === 'sine' || saved === 'organ') {
-      return saved;
-    }
-
-    return 'piano';
-  });
+  const [soundMode, setSoundModeState] = useState<SoundMode>('piano');
 
   useEffect(() => {
     setMounted(true);
+    
+    // Load sound mode from localStorage after mount
+    if (typeof window !== 'undefined') {
+      const saved = window.localStorage.getItem(soundStorageKey);
+      if (saved === 'piano' || saved === 'sine' || saved === 'organ') {
+        setSoundModeState(saved);
+      }
+    }
   }, []);
 
   useEffect(() => {
