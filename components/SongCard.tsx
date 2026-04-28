@@ -73,9 +73,9 @@ export function SongCard({ song }: SongCardProps) {
             type="button"
             onClick={() => handlePlayVoice(voice)}
             aria-pressed={activeVoice === voice}
-            className={`min-h-11 min-w-11 rounded-lg border px-4 py-2 text-sm font-semibold transition-all ${
+            className={`h-12 w-12 shrink-0 rounded-lg border text-sm font-semibold transition-colors ${
               activeVoice === voice
-                ? 'scale-105 border-emerald-500 bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-200 dark:border-emerald-400 dark:bg-emerald-500 dark:ring-emerald-900'
+                ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-200 dark:border-emerald-400 dark:bg-emerald-500 dark:ring-emerald-900'
                 : 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
             }`}
           >
