@@ -39,17 +39,24 @@ jobs:
         if: steps.preflight.outputs.ready == 'true'
         run: npm run build
 
-      - name: Deploy via FTP
+      - name: Install SSH deploy tooling
         if: steps.preflight.outputs.ready == 'true'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.ONECOM_HOST }}
-          username: ${{ secrets.ONECOM_USERNAME }}
-          password: ${{ secrets.ONECOM_PASSWORD }}
-          port: ${{ secrets.ONECOM_PORT || 21 }}
-          local-dir: ./out/
-          server-dir: ${{ secrets.ONECOM_REMOTE_PATH || '/' }}
-          dangerous-clean-slate: false
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass rsync
+
+      - name: Deploy via SSH rsync
+        if: steps.preflight.outputs.ready == 'true'
+        env:
+          ONECOM_HOST: ${{ secrets.ONECOM_HOST }}
+          ONECOM_USERNAME: ${{ secrets.ONECOM_USERNAME }}
+          ONECOM_PASSWORD: ${{ secrets.ONECOM_PASSWORD }}
+          ONECOM_PORT: ${{ secrets.ONECOM_PORT || 22 }}
+          ONECOM_REMOTE_PATH: ${{ secrets.ONECOM_REMOTE_PATH || '/' }}
+        run: |
+          sshpass -p "$ONECOM_PASSWORD" rsync -avz \
+            -e "ssh -p $ONECOM_PORT -o StrictHostKeyChecking=no" \
+            ./out/ "$ONECOM_USERNAME@$ONECOM_HOST:$ONECOM_REMOTE_PATH"
 
       - name: Workflow notice
         if: steps.preflight.outputs.ready != 'true'
