@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Deg vere are",
+    "nickname": "Aresangen",
+    "lyrics_snippet": "Deg vere are, Herre over dodsens makt",
+    "tempo_bpm": 84,
+    "sequence": ["B", "T", "A", "S"],
+    "pitches": {
+      "S": "E4",
+      "A": "C4",
+      "T": "G3",
+      "B": "E2"
+    },
+    "dropbox_url": "https://www.dropbox.com/s/example"
+  }
+]

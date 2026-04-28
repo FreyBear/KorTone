@@ -1,33 +1,68 @@
-# KorTone - Digital Stemmegaffel for ingve.com
+# KorTone - Digital stemmegaffel for ingve.com
 
-En lynrask, mobil-først webapplikasjon for korister. Siden viser en søkbar liste over stamrepertoar med mulighet for å spille av starttoner i sekvens.
+KorTone er en mobil-forst webapp for et lukket kor. Løsningen gir rask tilgang til starttoner per stemme, avspilling av stemmesekvenser og enkel administrasjon av repertoar.
 
-## 🚀 Teknisk Arkitektur
-- **Frontend:** Next.js (Static Site Generation - SSG)
-- **Hosting:** One.com Webhotell (Statisk hosting)
-- **Database & Auth:** Supabase (Client-side integrasjon)
-- **Lydmotor:** Tone.js (Web Audio API)
-- **Søk:** Fuse.js (Fuzzy search)
-- **Styling:** Tailwind CSS (Slate & Indigo fargepalett)
+## Prosjektstatus
+- Fase: Grunnlag og spesifikasjon
+- Malkonfigurasjon: Dokumentasjon + databaseoppsett + deployplan
+- Domene: ingve.com
+- Hosting: One.com (statisk webhotell)
 
-## 📋 Hovedfunksjonalitet
-- **Søk:** Live søk i tittel, kallenavn og første ord i sangen.
-- **Lyd:** 
-  - Spill av toner i definert sekvens (f.eks. B -> T -> A -> S).
-  - Mulighet for 4 taktslag (metronom) hvis tempo (BPM) er lagret.
-  - Instrumentvalg: Piano (sampling) og "Sinus/Square" (for støyete lokaler).
-- **Stemmegaffel:** Fast knapp nederst til høyre som spiller en A (440Hz) med 1s fade-out.
-- **Admin:** 
-  - Innlogging via Google (Supabase Auth).
-  - Administratorer kan redigere sanger direkte i applikasjonen (Inline editing).
-- **Design:** Dark Mode-støtte med standard slider.
+## Avklart MVP (v1)
+- Sokevisning med live-filter i tittel, kallenavn og tekstutdrag.
+- Avspilling av enkel stemmetone (S, A, T, B).
+- Avspilling av lagret sekvens, med 4 taktslag hvis tempo finnes.
+- Fast stemmegaffel-knapp nederst til hoyre (A=440Hz, fade-out).
+- Dark mode-toggle.
+- Admin-innlogging med Google via Supabase Auth.
+- Inline redigering av sanger for administratorer.
 
-## 🛠 Database-skjema (Supabase)
-Tabellen `songs` skal inneholde:
-- `title` (text)
-- `nickname` (text)
-- `lyrics_snippet` (text)
-- `tempo_bpm` (int)
-- `sequence` (text array, f.eks. ['B', 'T', 'A', 'S'])
-- `pitches` (jsonb, f.eks. {"S": "E4", "B": "G2"})
-- `dropbox_url` (text)
+Ikke i MVP:
+- Flerkor/multitenancy.
+- Avansert rettighetsmodell utover admin/ikke-admin.
+- Avansert mediebibliotek utover toneavspilling og eventuelle eksterne lenker.
+
+## Teknisk retning
+- Frontend: Next.js med statisk eksport.
+- Styling: Tailwind CSS (slate/indigo i henhold til designspesifikasjon).
+- Lydmotor: Tone.js.
+- Sok: Fuse.js.
+- Backend: Supabase (Auth + Postgres + RLS).
+
+## Adminmodell
+- Innlogging med Google i Supabase.
+- Roller styres i egen tabell for brukerroller.
+- Klient sjekker rolle for adminfunksjoner.
+- RLS beskytter skriveoperasjoner server-side.
+
+## Dataflyt
+- Primar flyt ved oppstart: import fra CSV/JSON til tabellen songs.
+- Sekundar flyt: vedlikehold direkte i app (inline editing).
+
+## Anbefalt deploy til One.com
+Anbefaling: statisk eksport av Next.js + automatisk opplasting via GitHub Actions (FTP/SFTP), med manuell fallback.
+
+Begrunnelse:
+- Gir repeterbar deploy.
+- Reduserer manuelle feil.
+- Passer statisk webhotell.
+
+Detaljer ligger i docs/DEPLOYMENT_ONE_COM.md.
+
+## Miljovariabler
+Se .env.example for forventede variabler.
+
+## Planlagte filer i dette grunnlaget
+- SPEC.md: konkret funksjonell og teknisk spesifikasjon.
+- ARCHITECTURE.md: komponentoversikt og dataflyt.
+- supabase/schema.sql: tabeller og indekser.
+- supabase/policies.sql: RLS-policyer.
+- data/songs.template.json: importmal for sangdata.
+- docs/DEPLOYMENT_ONE_COM.md: deployoppskrift.
+
+## Neste milepael
+1. Opprette Next.js app med Tailwind og grunnlayout.
+2. Koble Supabase-klient, auth og rollekontroll.
+3. Implementere sangliste, sok og toneavspilling.
+4. Implementere admin inline editing og importskript.
+5. Sette opp CI-basert deploy til One.com.

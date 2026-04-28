@@ -1,0 +1,82 @@
+-- KorTone RLS policies
+-- Run after schema.sql
+
+alter table public.songs enable row level security;
+alter table public.user_roles enable row level security;
+
+-- Helper: check whether current user is admin
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+as $$
+  select exists (
+    select 1
+    from public.user_roles ur
+    where ur.user_id = auth.uid()
+      and ur.role = 'admin'
+  );
+$$;
+
+-- Songs policies
+ drop policy if exists "songs_select_authenticated" on public.songs;
+create policy "songs_select_authenticated"
+on public.songs
+for select
+to authenticated
+using (true);
+
+drop policy if exists "songs_insert_admin" on public.songs;
+create policy "songs_insert_admin"
+on public.songs
+for insert
+to authenticated
+with check (public.is_admin());
+
+drop policy if exists "songs_update_admin" on public.songs;
+create policy "songs_update_admin"
+on public.songs
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "songs_delete_admin" on public.songs;
+create policy "songs_delete_admin"
+on public.songs
+for delete
+to authenticated
+using (public.is_admin());
+
+-- user_roles policies
+-- Read own role
+ drop policy if exists "roles_select_own" on public.user_roles;
+create policy "roles_select_own"
+on public.user_roles
+for select
+to authenticated
+using (user_id = auth.uid());
+
+-- Optional stricter setup:
+-- Do not allow direct writes from anon/authenticated clients.
+ drop policy if exists "roles_no_client_insert" on public.user_roles;
+create policy "roles_no_client_insert"
+on public.user_roles
+for insert
+to authenticated
+with check (false);
+
+ drop policy if exists "roles_no_client_update" on public.user_roles;
+create policy "roles_no_client_update"
+on public.user_roles
+for update
+to authenticated
+using (false)
+with check (false);
+
+ drop policy if exists "roles_no_client_delete" on public.user_roles;
+create policy "roles_no_client_delete"
+on public.user_roles
+for delete
+to authenticated
+using (false);
