@@ -66,28 +66,30 @@ export function SongCard({ song }: SongCardProps) {
         <p className="mt-2 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{song.lyrics_snippet}</p>
       ) : null}
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
-        {orderedVoices.map((voice) => (
-          <button
-            key={voice}
-            type="button"
-            onClick={() => handlePlayVoice(voice)}
-            aria-pressed={activeVoice === voice}
-            className={`h-12 w-12 shrink-0 rounded-lg border text-sm font-semibold transition-colors ${
-              activeVoice === voice
-                ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-200 dark:border-emerald-400 dark:bg-emerald-500 dark:ring-emerald-900'
-                : 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
-            }`}
-          >
-            {voice}
-          </button>
-        ))}
+      <div className="mt-4 space-y-2">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {orderedVoices.map((voice) => (
+            <button
+              key={voice}
+              type="button"
+              onClick={() => handlePlayVoice(voice)}
+              aria-pressed={activeVoice === voice}
+              className={`h-11 w-11 shrink-0 rounded-lg border text-sm font-semibold transition-colors ${
+                activeVoice === voice
+                  ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-200 dark:border-emerald-400 dark:bg-emerald-500 dark:ring-emerald-900'
+                  : 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+            >
+              {voice}
+            </button>
+          ))}
+        </div>
 
         <button
           type="button"
           onClick={handlePlaySequence}
           disabled={isPlayingSequence}
-          className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-75"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-75 sm:w-auto"
         >
           <Play size={14} />
           {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
