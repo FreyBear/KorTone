@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { LogIn } from 'lucide-react';
-import { supabase, supabaseKey } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export default function SignInButton() {
   const [loading, setLoading] = useState(false);
@@ -19,10 +19,7 @@ export default function SignInButton() {
       await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback.html`,
-          queryParams: {
-            apikey: supabaseKey ?? '',
-          },
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
     } catch (error) {
