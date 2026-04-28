@@ -111,10 +111,18 @@ export default function Home() {
 
       // Check user permissions
       if (currentSession) {
-        const { data: adminCheck } = await supabase.rpc('is_admin');
-        const { data: canEditCheck } = await supabase.rpc('can_edit_songs');
+        const { data: adminCheck, error: adminError } = await supabase.rpc('is_admin');
         setIsAdmin(adminCheck === true);
-        setCanEdit(canEditCheck === true);
+        
+        // Try to check can_edit_songs (may not exist yet if SQL not run)
+        const { data: canEditCheck, error: canEditError } = await supabase.rpc('can_edit_songs');
+        if (canEditError) {
+          // Fallback: if function doesn't exist, use isAdmin for editing
+          console.warn('can_edit_songs() not found, using isAdmin fallback');
+          setCanEdit(adminCheck === true);
+        } else {
+          setCanEdit(canEditCheck === true);
+        }
       } else {
         setIsAdmin(false);
         setCanEdit(false);
@@ -127,9 +135,16 @@ export default function Home() {
         // Re-check permissions
         if (session) {
           const { data: adminCheck } = await supabase.rpc('is_admin');
-          const { data: canEditCheck } = await supabase.rpc('can_edit_songs');
           setIsAdmin(adminCheck === true);
-          setCanEdit(canEditCheck === true);
+          
+          // Try to check can_edit_songs (may not exist yet if SQL not run)
+          const { data: canEditCheck, error: canEditError } = await supabase.rpc('can_edit_songs');
+          if (canEditError) {
+            // Fallback: if function doesn't exist, use isAdmin for editing
+            setCanEdit(adminCheck === true);
+          } else {
+            setCanEdit(canEditCheck === true);
+          }
         } else {
           setIsAdmin(false);
           setCanEdit(false);
