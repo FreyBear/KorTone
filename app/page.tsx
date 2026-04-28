@@ -22,6 +22,7 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('Demo-data aktiv.');
   const [session, setSession] = useState<Session | null>(null);
+  const [mounted, setMounted] = useState(false);
   const [soundMode, setSoundModeState] = useState<SoundMode>(() => {
     if (typeof window === 'undefined') {
       return 'piano';
@@ -34,6 +35,10 @@ export default function Home() {
 
     return 'piano';
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setSoundMode(soundMode);
@@ -122,7 +127,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <SoundModeSelect value={soundMode} onChange={setSoundModeState} />
           <ThemeToggle />
-          {session ? <LogOutButton /> : <SignInButton />}
+          {mounted && (session ? <LogOutButton /> : <SignInButton />)}
         </div>
       </header>
 

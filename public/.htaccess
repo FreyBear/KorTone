@@ -3,6 +3,11 @@ DirectoryIndex index.html
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 	
+	# Remove trailing slashes (except for root)
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteCond %{REQUEST_URI} (.+)/$
+	RewriteRule ^ %1 [R=301,L]
+	
 	# Serve .html files for routes without extension
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
