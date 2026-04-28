@@ -1,0 +1,37 @@
+name: Deploy to one.com
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build static site
+        run: npm run build
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.ONECOM_HOST }}
+          username: ${{ secrets.ONECOM_USERNAME }}
+          password: ${{ secrets.ONECOM_PASSWORD }}
+          port: ${{ secrets.ONECOM_PORT || 21 }}
+          local-dir: ./out/
+          server-dir: ${{ secrets.ONECOM_REMOTE_PATH || '/' }}
+          dangerous-clean-slate: false
