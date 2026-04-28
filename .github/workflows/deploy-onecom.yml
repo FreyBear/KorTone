@@ -59,7 +59,7 @@ jobs:
             REMOTE_PATH="/customers/5/0/1/ingve.com/httpd.www"
           fi
 
-          sshpass -p "$ONECOM_PASSWORD" rsync -avz \
+          sshpass -p "$ONECOM_PASSWORD" rsync -avz --delete \
             -e "ssh -p $ONECOM_PORT -o StrictHostKeyChecking=no" \
             ./out/ "$ONECOM_USERNAME@$ONECOM_HOST:$REMOTE_PATH"
 
