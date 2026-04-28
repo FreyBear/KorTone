@@ -45,13 +45,10 @@ async function createSynth(mode: SoundMode) {
     }).toDestination();
   }
 
-  if (mode === 'flute') {
-    return new Tone.PolySynth(Tone.AMSynth, {
-      harmonicity: 1.8,
-      oscillator: { type: 'sine' },
-      envelope: { attack: 0.03, decay: 0.1, sustain: 0.9, release: 0.7 },
-      modulation: { type: 'triangle' },
-      modulationEnvelope: { attack: 0.05, decay: 0.2, sustain: 0.35, release: 0.6 },
+  if (mode === 'organ') {
+    return new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'square8' },
+      envelope: { attack: 0.01, decay: 0.05, sustain: 0.95, release: 0.25 },
     }).toDestination();
   }
 

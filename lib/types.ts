@@ -1,5 +1,5 @@
 export type Voice = 'S' | 'A' | 'T' | 'B';
-export type SoundMode = 'piano' | 'sine' | 'flute';
+export type SoundMode = 'piano' | 'sine' | 'organ';
 
 export type Song = {
   id: string;

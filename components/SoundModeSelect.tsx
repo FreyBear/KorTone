@@ -19,7 +19,7 @@ export function SoundModeSelect({ value, onChange }: SoundModeSelectProps) {
       >
         <option value="piano">Piano</option>
         <option value="sine">Sinus</option>
-        <option value="flute">Fløyte</option>
+        <option value="organ">Orgel</option>
       </select>
     </label>
   );

@@ -24,7 +24,7 @@ export default function Home() {
     }
 
     const saved = window.localStorage.getItem(soundStorageKey);
-    if (saved === 'piano' || saved === 'sine' || saved === 'flute') {
+    if (saved === 'piano' || saved === 'sine' || saved === 'organ') {
       return saved;
     }
 
