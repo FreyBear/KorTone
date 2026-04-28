@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { LogIn } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export default function SignInButton() {
   const [loading, setLoading] = useState(false);
 
   const handleSignIn = async () => {
+    const supabase = getSupabase();
+    
     if (!supabase) {
       console.error('Supabase is not configured.');
       return;

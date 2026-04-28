@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
     const handleCallback = async () => {
+      const supabase = getSupabase();
+      
       if (!supabase) {
         router.push('/');
         return;

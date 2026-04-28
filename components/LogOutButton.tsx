@@ -3,13 +3,15 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { getSupabase } from '@/lib/supabase';
 
 export default function LogOutButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogOut = async () => {
+    const supabase = getSupabase();
+    
     if (!supabase) {
       console.error('Supabase is not configured.');
       return;

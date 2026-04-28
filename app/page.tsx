@@ -12,7 +12,7 @@ import LogOutButton from '@/components/LogOutButton';
 import type { Session } from '@supabase/supabase-js';
 import { setSoundMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
-import { hasSupabaseEnv, supabase } from '@/lib/supabase';
+import { hasSupabaseEnv, getSupabase } from '@/lib/supabase';
 import type { Song, SoundMode } from '@/lib/types';
 
 const soundStorageKey = 'kortone-sound-mode';
@@ -42,6 +42,8 @@ export default function Home() {
 
   useEffect(() => {
     async function loadSongs() {
+      const supabase = getSupabase();
+      
       if (!hasSupabaseEnv || !supabase) {
         setStatus('Demo-data aktiv. Legg inn Supabase-verdier for live data.');
         return;
@@ -70,6 +72,8 @@ export default function Home() {
 
   useEffect(() => {
     async function getSession() {
+      const supabase = getSupabase();
+      
       if (!hasSupabaseEnv || !supabase) {
         return;
       }
