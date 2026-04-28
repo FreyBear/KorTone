@@ -11,9 +11,10 @@
 - Sokevisning av sanger med livefilter.
 - Avspilling av enkelttoner per stemme (S, A, T, B).
 - Avspilling av definert sekvens.
-- Valgfri 4-takts opptelling nar tempo finnes.
-- Fast stemmegaffel-knapp (A=440Hz).
+- Visuell markering av hvilken stemme som spilles.
+- Fast stemmegaffel-knapp (A=440Hz) med hold-for-avspilling og fade-out pa release.
 - Dark mode-toggle.
+- Favicon med musikknote.
 - Google-innlogging for admin.
 - Inline redigering for admin.
 - Oppstartsimport fra CSV/JSON.
@@ -40,14 +41,17 @@
 - Sticky sokefelt i topp.
 - Sangkort med:
   - Tittel.
-  - Horisontal rad med stemmeknapper: S, A, T, B.
-  - Knapp for Spill sekvens (play-ikon).
+  - Rad med stemmeknapper: S, A, T, B.
+  - Tydelig aktiv-state pa stemmeknapp under avspilling.
+  - Knapp for Spill sekvens (play-ikon), egen rad pa mobil.
 - Flytende stemmegaffelknapp nederst til hoyre.
 
 ### 3.3 Responsivitet og bruk
 - Mobil-forst layout.
 - Optimalisert for en-hands bruk.
 - Tap targets minimum 44x44 px.
+- Stemmeknapper skal vaere kvadratiske pa mobil og desktop.
+- Aktiv knappemarkering skal ikke endre layoutstorrelse.
 
 ## 4. Funksjonelle krav
 ### 4.1 Sok
@@ -58,12 +62,13 @@
 ### 4.2 Lyd
 - Klikk pa stemmeknapp spiller kun valgt tone.
 - Spill sekvens spiller i lagret rekkefolge.
-- Hvis tempo_bpm er satt, skal opptelling kunne aktiveres.
+- Sekvensoppstart viser aktiv stemme fortlopende i UI.
 - Standard instrument ved forste last: Piano.
 
 ### 4.3 Stemmegaffel
-- FAB spiller A4 (440Hz).
-- Avspilling skal fade ut pa ca 1 sekund.
+- FAB starter A4 (440Hz) nar knapp holdes inne.
+- FAB slipper tonen med fade-out nar knapp slippes.
+- Skal fungere for mus (down/up/leave) og touch (start/end).
 
 ### 4.4 Admin
 - Innlogging via Supabase Auth med Google.
@@ -101,9 +106,17 @@
 - Lyd: Tone.js.
 - Sok: Fuse.js.
 
+Implementert dataflyt na:
+- CSV-kilde i sanger.csv.
+- Konvertering via scripts/parse-sanger.js.
+- JSON-bibliotek i data/sanger-library.json.
+- Fallback-lastepunkt i lib/songData.ts.
+
 ## 8. Deploykrav
 - Bygg skal produsere statiske filer.
-- Publisering til one.com skal kunne automatiseres via GitHub Actions + FTP/SFTP.
+- Publisering til one.com automatiseres via GitHub Actions + SSH/rsync.
+- Deploy skal bruke rsync --delete for a fjerne foreldede filer.
+- Root-oppsel skal styres med .htaccess.
 - Manuell opplasting skal fungere som fallback.
 
 ## 9. Kvalitetskrav
@@ -115,5 +128,7 @@
 - Bruker finner sang ved sok innen fa tastetrykk.
 - Bruker kan spille enkelttoner for alle stemmer pa et sangkort.
 - Bruker kan spille sekvens for en sang.
+- Bruker ser tydelig hvilken stemme som spilles under avspilling.
+- Stemmegaffel spiller sa lenge knapp holdes inne, og fader ut pa slipp.
 - Admin kan logge inn og redigere minst ett felt pa en sang.
 - Losningen er tilgjengelig pa ingve.com etter deploy.

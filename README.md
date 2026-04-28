@@ -1,70 +1,57 @@
 # KorTone - Digital stemmegaffel for ingve.com
 
-KorTone er en mobil-forst webapp for et lukket kor. Løsningen gir rask tilgang til starttoner per stemme, avspilling av stemmesekvenser og enkel administrasjon av repertoar.
+KorTone er en mobil-forst webapp for korister. Løsningen gir rask tilgang til starttoner per stemme, sekvensavspilling og stemmegaffel (A440).
 
-## Prosjektstatus
-- Fase: Grunnlag og spesifikasjon
-- Malkonfigurasjon: Dokumentasjon + databaseoppsett + deployplan
-- Domene: ingve.com
-- Hosting: One.com (statisk webhotell)
+## Status na
+- Appen er bygget og deployes automatisk til one.com via GitHub Actions.
+- Produksjon kjører pa www.ingve.com.
+- 51 sanger fra CSV er konvertert til app-format og brukt som fallback-data.
+- Lint og build er gronne i repo.
 
-## Avklart MVP (v1)
+## Ferdige funksjoner
 - Sokevisning med live-filter i tittel, kallenavn og tekstutdrag.
 - Avspilling av enkel stemmetone (S, A, T, B).
-- Avspilling av lagret sekvens, med 4 taktslag hvis tempo finnes.
-- Fast stemmegaffel-knapp nederst til hoyre (A=440Hz, fade-out).
+- Avspilling av sekvens per sang.
+- Visuell utheving av aktiv stemmeknapp under avspilling.
+- Mobiljustert knappelayout (kvadratiske stemmeknapper, egen rad for Spill sekvens).
+- Stemmegaffel-knapp: spiller sa lenge knappen holdes inne, fader ut nar knappen slippes.
 - Dark mode-toggle.
-- Admin-innlogging med Google via Supabase Auth.
-- Inline redigering av sanger for administratorer.
+- Eget favicon med musikknote.
 
-Ikke i MVP:
-- Flerkor/multitenancy.
-- Avansert rettighetsmodell utover admin/ikke-admin.
-- Avansert mediebibliotek utover toneavspilling og eventuelle eksterne lenker.
-
-## Teknisk retning
-- Frontend: Next.js med statisk eksport.
-- Styling: Tailwind CSS (slate/indigo i henhold til designspesifikasjon).
-- Lydmotor: Tone.js.
+## Teknologistack
+- Frontend: Next.js (App Router) med statisk eksport.
+- Styling: Tailwind CSS.
+- Lyd: Tone.js.
 - Sok: Fuse.js.
-- Backend: Supabase (Auth + Postgres + RLS).
+- Backend: Supabase-klient (med fallback til lokale data).
 
-## Adminmodell
-- Innlogging med Google i Supabase.
-- Roller styres i egen tabell for brukerroller.
-- Klient sjekker rolle for adminfunksjoner.
-- RLS beskytter skriveoperasjoner server-side.
+## Data og import
+- Kilde: sanger.csv i repo-roten.
+- Konverteringsscript: scripts/parse-sanger.js.
+- Generert bibliotek: data/sanger-library.json.
+- Fallback i appen: lib/songData.ts leser data/sanger-library.json.
 
-## Dataflyt
-- Primar flyt ved oppstart: import fra CSV/JSON til tabellen songs.
-- Sekundar flyt: vedlikehold direkte i app (inline editing).
-
-## Anbefalt deploy til One.com
-Anbefaling: statisk eksport av Next.js + automatisk opplasting via GitHub Actions (FTP/SFTP), med manuell fallback.
-
-Begrunnelse:
-- Gir repeterbar deploy.
-- Reduserer manuelle feil.
-- Passer statisk webhotell.
-
-Detaljer ligger i docs/DEPLOYMENT_ONE_COM.md.
+## Deploy
+- Workflow: .github/workflows/deploy-onecom.yml.
+- Bygg: npm ci + npm run build.
+- Opplasting: SSH + rsync til one.com webroot.
+- Rydding av gamle filer: rsync med --delete.
+- Root-oppsel pa one.com styres via public/.htaccess.
 
 ## Miljovariabler
 Se .env.example for forventede variabler.
-For Supabase: bruk NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY som standard.
-NEXT_PUBLIC_SUPABASE_ANON_KEY kan brukes som fallback i eldre oppsett.
 
-## Planlagte filer i dette grunnlaget
-- SPEC.md: konkret funksjonell og teknisk spesifikasjon.
-- ARCHITECTURE.md: komponentoversikt og dataflyt.
-- supabase/schema.sql: tabeller og indekser.
-- supabase/policies.sql: RLS-policyer.
-- data/songs.template.json: importmal for sangdata.
-- docs/DEPLOYMENT_ONE_COM.md: deployoppskrift.
+Supabase:
+- NEXT_PUBLIC_SUPABASE_URL
+- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (anbefalt)
+- NEXT_PUBLIC_SUPABASE_ANON_KEY (fallback)
 
-## Neste milepael
-1. Opprette Next.js app med Tailwind og grunnlayout.
-2. Koble Supabase-klient, auth og rollekontroll.
-3. Implementere sangliste, sok og toneavspilling.
-4. Implementere admin inline editing og importskript.
-5. Sette opp CI-basert deploy til One.com.
+## Gjenstaende arbeid (MVP)
+- Kjore supabase/schema.sql og supabase/policies.sql i Supabase.
+- Aktivere Google Auth-provider i Supabase.
+- Legge inn admin-bruker i user_roles.
+- Implementere admin-innlogging og inline redigering i UI.
+- Importere data til songs-tabellen (i stedet for kun fallback JSON).
+
+## Viktig om samtalelogger
+Chat i Codespaces bor ikke vaere eneste kilde til historikk. Behold viktige beslutninger i repo-filer (README, SPEC, commits), siden de er den tryggeste langsiktige dokumentasjonen.
