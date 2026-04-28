@@ -1,12 +1,24 @@
 DirectoryIndex index.html
 
-RewriteEngine On
-RewriteRule ^$ /index.html [R=302,L]
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	
+	# Serve index.html for root without redirect
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^$ index.html [L]
+</IfModule>
 
 <IfModule mod_headers.c>
+	# Prevent caching of HTML files
 	<FilesMatch "\.(html)$">
 		Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
 		Header set Pragma "no-cache"
 		Header set Expires "0"
+	</FilesMatch>
+	
+	# Also prevent caching of JS files during development/testing
+	<FilesMatch "\.(js|json)$">
+		Header set Cache-Control "no-cache, must-revalidate"
 	</FilesMatch>
 </IfModule>
