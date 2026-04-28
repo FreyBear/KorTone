@@ -4,14 +4,17 @@ import { Play } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { playSequence, playVoice } from '@/lib/audio';
 import type { Song, Voice } from '@/lib/types';
+import { EditSongModal } from './EditSongModal';
 
 const orderedVoices: Voice[] = ['S', 'A', 'T', 'B'];
 
 type SongCardProps = {
   song: Song;
+  isAdmin?: boolean;
+  onSongUpdated?: () => void;
 };
 
-export function SongCard({ song }: SongCardProps) {
+export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps) {
   const [activeVoice, setActiveVoice] = useState<Voice | null>(null);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
   const clearVoiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -61,7 +64,12 @@ export function SongCard({ song }: SongCardProps) {
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">{song.title}</h2>
-        <span className="shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">{song.voices}</span>
+        <div className="flex items-center gap-3">
+          <span className="shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">{song.voices}</span>
+          {isAdmin && onSongUpdated && (
+            <EditSongModal song={song} isAdmin={isAdmin} onSongUpdated={onSongUpdated} />
+          )}
+        </div>
       </div>
       {song.key_signature ? (
         <p className="mt-1 text-xs text-slate-500">{song.key_signature} · {song.tempo_bpm} BPM</p>

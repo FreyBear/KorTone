@@ -19,11 +19,11 @@ as $$
 $$;
 
 -- Songs policies
- drop policy if exists "songs_select_authenticated" on public.songs;
-create policy "songs_select_authenticated"
+drop policy if exists "songs_select_all" on public.songs;
+create policy "songs_select_all"
 on public.songs
 for select
-to authenticated
+to authenticated, anon
 using (true);
 
 drop policy if exists "songs_insert_admin" on public.songs;

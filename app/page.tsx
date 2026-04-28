@@ -20,6 +20,7 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('Demo-data aktiv.');
   const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [soundMode, setSoundModeState] = useState<SoundMode>('piano');
 
@@ -70,6 +71,21 @@ export default function Home() {
     loadSongs();
   }, []);
 
+  // Reload function that can be called after updating songs
+  async function reloadSongs() {
+    const supabase = getSupabase();
+    if (!supabase) return;
+
+    const { data } = await supabase
+      .from('songs')
+      .select('id,title,voices,sequence,pitches,key_signature,tempo_bpm')
+      .order('title', { ascending: true });
+
+    if (data) {
+      setSongs(data as Song[]);
+    }
+  }
+
   useEffect(() => {
     async function getSession() {
       const supabase = getSupabase();
@@ -79,11 +95,28 @@ export default function Home() {
       }
 
       const { data } = await supabase.auth.getSession();
-      setSession(data?.session || null);
+      const currentSession = data?.session || null;
+      setSession(currentSession);
+
+      // Check if user is admin
+      if (currentSession) {
+        const { data: adminCheck } = await supabase.rpc('is_admin');
+        setIsAdmin(adminCheck === true);
+      } else {
+        setIsAdmin(false);
+      }
 
       // Listen for auth changes
-      const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
         setSession(session);
+        
+        // Re-check admin status
+        if (session) {
+          const { data: adminCheck } = await supabase.rpc('is_admin');
+          setIsAdmin(adminCheck === true);
+        } else {
+          setIsAdmin(false);
+        }
       });
 
       return () => {
@@ -173,7 +206,7 @@ export default function Home() {
 
       <section className="space-y-3 px-4 pt-4">
         {filteredSongs.map((song) => (
-          <SongCard key={song.id} song={song} />
+          <SongCard key={song.id} song={song} isAdmin={isAdmin} onSongUpdated={reloadSongs} />
         ))}
       </section>
 
