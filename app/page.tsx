@@ -7,6 +7,9 @@ import { SongCard } from '@/components/SongCard';
 import { SoundModeSelect } from '@/components/SoundModeSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TuningForkFab } from '@/components/TuningForkFab';
+import SignInButton from '@/components/SignInButton';
+import LogOutButton from '@/components/LogOutButton';
+import type { Session } from '@supabase/supabase-js';
 import { setSoundMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
 import { hasSupabaseEnv, supabase } from '@/lib/supabase';
@@ -18,6 +21,7 @@ export default function Home() {
   const [songs, setSongs] = useState<Song[]>(fallbackSongs);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('Demo-data aktiv.');
+  const [session, setSession] = useState<Session | null>(null);
   const [soundMode, setSoundModeState] = useState<SoundMode>(() => {
     if (typeof window === 'undefined') {
       return 'piano';
@@ -64,6 +68,28 @@ export default function Home() {
     loadSongs();
   }, []);
 
+  useEffect(() => {
+    async function getSession() {
+      if (!hasSupabaseEnv || !supabase) {
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      setSession(data?.session || null);
+
+      // Listen for auth changes
+      const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+        setSession(session);
+      });
+
+      return () => {
+        listener?.subscription.unsubscribe();
+      };
+    }
+
+    getSession();
+  }, []);
+
   const fuse = useMemo(
     () =>
       new Fuse(songs, {
@@ -92,6 +118,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <SoundModeSelect value={soundMode} onChange={setSoundModeState} />
           <ThemeToggle />
+          {session ? <LogOutButton /> : <SignInButton />}
         </div>
       </header>
 
