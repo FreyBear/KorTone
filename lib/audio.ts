@@ -87,11 +87,13 @@ async function toNote(value: string | undefined, fallbackMidi: number, voice?: V
     return normalized.replace('B', 'b');
   }
   
-  // If no octave specified, use voice-appropriate octave
+  // If no octave specified, add one
   const hasOctave = /\d$/.test(normalized);
-  if (!hasOctave && voice) {
+  if (!hasOctave) {
     const noteWithoutOctave = normalized.replace('B', 'b');
-    return `${noteWithoutOctave}${voiceOctave[voice]}`;
+    // Use voice-appropriate octave if voice is specified, otherwise use octave 4
+    const octave = voice ? voiceOctave[voice] : 4;
+    return `${noteWithoutOctave}${octave}`;
   }
 
   return Tone.Frequency(fallbackMidi, 'midi').toNote();
