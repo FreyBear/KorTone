@@ -96,13 +96,6 @@ export async function playSequence(
   }
 }
 
-export async function playTuningForkA(): Promise<void> {
-  await primeAudioContext();
-  const synth = await getSynth();
-  synth.triggerAttack('A4');
-  setTimeout(() => synth.triggerRelease('A4'), 1000);
-}
-
 export async function holdTuningForkA(): Promise<void> {
   await primeAudioContext();
   const synth = await getSynth();

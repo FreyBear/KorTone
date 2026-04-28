@@ -4,6 +4,11 @@
 - JSON (anbefalt)
 - CSV (kan konverteres til JSON for enklere validering)
 
+## CSV i dette repoet
+- Kilde: sanger.csv
+- Konvertering: node scripts/parse-sanger.js
+- Output: data/sanger-library.json
+
 ## JSON-mal
 Se data/songs.template.json.
 
@@ -17,11 +22,13 @@ Se data/songs.template.json.
 - dropbox_url: valgfri URL
 
 ## Anbefalt importprosess
-1. Valider JSON lokalt mot malstrukturen.
-2. Kjor kontroll pa at sequence kun inneholder S/A/T/B.
-3. Kjor kontroll pa at pitches inneholder gyldige notenavn.
-4. Last opp til Supabase via SQL, script eller dashboard.
-5. Verifiser i appen med sok og avspilling.
+1. Oppdater sanger.csv.
+2. Kjor node scripts/parse-sanger.js > data/sanger-library.json.
+3. Valider JSON lokalt mot malstrukturen.
+4. Kjor kontroll pa at sequence kun inneholder S/A/T/B.
+5. Kjor kontroll pa at pitches inneholder gyldige notenavn.
+6. Last opp til Supabase via SQL, script eller dashboard.
+7. Verifiser i appen med sok og avspilling.
 
 ## Kvalitetssjekk etter import
 - Minst 1 sang har komplett S/A/T/B i pitches.

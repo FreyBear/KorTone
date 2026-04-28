@@ -12,4 +12,3 @@ out/
 
 # Keep template file tracked
 !.env.example
-node_modules
