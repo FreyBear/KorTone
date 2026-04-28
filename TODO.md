@@ -1,56 +1,96 @@
-# KorTone – Gjenstående oppgaver
+# KorTone – Status og gjenstående oppgaver
 
-## 1. Supabase-oppsett
+## ✅ Fullført (Januar 2026)
 
-- [ ] Opprett prosjekt på [supabase.com](https://supabase.com) om ikke gjort
-- [ ] Kjør `supabase/schema.sql` i Supabase SQL-editor (tabeller: `songs`, `user_roles`, indekser, trigger)
-- [ ] Kjør `supabase/policies.sql` i Supabase SQL-editor (Row Level Security)
-- [ ] Legg inn miljøvariabler i GitHub-repoet (Settings → Secrets → Actions):
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- [ ] Verifiser at appen henter live data fra Supabase (statuslinje i header skal si "Koblet til Supabase")
+### Database & Infrastruktur
+- [x] Opprettet Supabase-prosjekt
+- [x] Kjørt `supabase/schema.sql` (tabeller: `songs`, `user_roles`)
+- [x] Kjørt `supabase/policies.sql` (Row Level Security)
+- [x] Satt opp miljøvariabler i GitHub Secrets
+- [x] Appen henter live data fra Supabase
+- [x] Auto-deployment via GitHub Actions til one.com
 
-## 2. Google-innlogging
+### Autentisering
+- [x] Google OAuth fungerer via Supabase
+- [x] Redirect URLs konfigurert (`https://ingve.com/auth/callback`)
+- [x] Diskret auth UI (text links under header)
+- [x] Logg ut-funksjonalitet
 
-- [ ] Gå til Supabase → Authentication → Providers → Google
-- [ ] Aktiver Google-provider og lim inn OAuth-klientnøkler fra Google Cloud Console
-- [ ] Legg til `https://ingve.com` og `https://www.ingve.com` som godkjente redirect-URLer i Supabase
-- [ ] Test innlogging på live-nettsiden
+### Sanger & Data
+- [x] Ny database-struktur basert på CSV (`sanger.csv`)
+- [x] Kolonnner: `title`, `nickname`, `voices`, `sequence`, `pitches`, `key_signature`, `tempo_bpm`
+- [x] Import-script: `scripts/import-csv-to-supabase.js`
+- [x] 7 sanger importert (Helan, Helan går, Akademisk bordvers, etc.)
+- [x] Søkbart kallenavn-felt (vises ikke i UI)
+- [x] Offentlig visning (alle kan se sanger uten innlogging)
 
-## 3. Importer sanger til Supabase
+### Admin & Roller
+- [x] Rollehåndtering: `admin` og `editor` (redaktør)
+- [x] AdminPanel-komponent for brukerhåndtering
+- [x] Admin kan se alle brukere og tildele roller
+- [x] Editor kan redigere sanger, men ikke administrere brukere
+- [x] RLS policies oppdatert for begge roller
 
-- [ ] Skriv et importskript (f.eks. `scripts/import-to-supabase.js`) som leser `data/sanger-library.json` og bruker Supabase service-role-nøkkel til å sette inn rader i `songs`-tabellen
-- [ ] Kjør skriptet én gang for å populere basen
-- [ ] Verifiser at alle 51 sanger dukker opp i appen via live-data
+### Redigering
+- [x] EditSongModal for admin/editor
+- [x] Kan redigere: tittel, kallenavn, voices, sekvens, toneart, BPM, pitches
+- [x] Dialog lukker automatisk etter vellykket lagring
+- [x] Feilhåndtering med tydelige meldinger
 
-## 4. Adminpanel – innlogging og tilgangskontroll
+### Audio & Playback
+- [x] Sequence-playback fungerer (A C F A spiller riktig)
+- [x] Oktav-mapping for stemmer (T=oktav 3, B=oktav 2)
+- [x] Default oktav 4 for noter uten oktav-spesifikasjon
 
-- [ ] Legg til innloggingsside eller modal som starter Google OAuth-flyt (`supabase.auth.signInWithOAuth({ provider: 'google' })`)
-- [ ] Etter innlogging: sjekk `user_roles`-tabellen for å bekrefte at brukeren har `role = 'admin'`
-- [ ] Vis admin-kontroller kun for brukere med adminrolle
-- [ ] Legg til logg-ut-knapp
+## 🔨 Gjenstående oppgaver
 
-## 5. Adminpanel – sanger
+### 1. Sang-administrasjon
+- [ ] "Legg til ny sang"-funksjon (tom form → lagre til database)
+- [ ] Slett sang-funksjonalitet (med bekreftelsesdialog, kun admin)
+- [ ] Bulk-import fra CSV via admin-panel
+- [ ] Validering av `sequence` array (gyldige noter)
+- [ ] Validering av `pitches` JSON format
 
-- [ ] Inline redigering av eksisterende sang (klikk på felt → rediger → lagre til Supabase)
-  - Felter: `title`, `nickname`, `lyrics_snippet`, `tempo_bpm`, `sequence`, `pitches`, `dropbox_url`
-- [ ] Opprett ny sang (tom form + lagre)
-- [ ] Slett sang (med bekreftelsesdialog)
-- [ ] Valider at `sequence` er gyldig array av `S | A | T | B`
-- [ ] Valider at `pitches` inneholder korrekte noter for valgte stemmer
+### 2. Audio-forbedringer
+- [ ] Metronom-funksjon (global eller per sang)
+- [ ] Velg oktav for sequence-playback per sang
+- [ ] Justere lengde/duration på sequence-noter
+- [ ] Volume-kontroll
 
-## 6. Adminpanel – brukeradministrasjon
+### 3. UX-forbedringer
+- [ ] Loading-tilstand på "Spill sekvens"-knapp
+- [ ] Optimistisk oppdatering av sangliste etter lagring
+- [ ] Bedre mobile-visning for AdminPanel
+- [ ] Keyboard shortcuts (space = play sequence, etc.)
+- [ ] Toast-meldinger i stedet for alert()
 
-- [ ] Legg til side/seksjon der admin kan tildele adminrolle til andre brukere (legg inn rad i `user_roles`)
-- [ ] Støtte for å fjerne adminrolle
+### 4. Søk & Filter
+- [ ] Filter på voices (SATB, TTBB, Unison)
+- [ ] Filter på toneart
+- [ ] Sortering (alfabetisk, nyeste først, etc.)
 
-## 7. Feilhåndtering og UX
+### 5. Datamigrering
+- [ ] Vurder om `sanger.csv` skal arkiveres etter import
+- [ ] Fjern `data/sanger-library.json` (ikke lenger i bruk)
+- [ ] Dokumenter CSV-format for fremtidige importer
 
-- [ ] Vis tydelig feilmelding om Supabase-kall feiler (lagring, innlogging)
-- [ ] Optionistisk oppdatering av liste etter lagret sang
-- [ ] Loading-tilstand på "Lagre"-knapp under API-kall
+### 6. Diverse
+- [ ] Legg til "Om"-side med info om appen
+- [ ] Eksporter sangliste til PDF/CSV
+- [ ] Sanghistorikk (sist spilte sanger)
+- [ ] Favoritter-funksjon per bruker
 
-## 8. Smårydding
+## 📝 SQL-scripts å kjøre i Supabase
 
-- [ ] Norske tegn i UI: "Mørk" i stedet for "Mork" (ThemeToggle-knapp)
-- [ ] Vurder om sanger.csv fortsatt skal ligge i repoet etter DB-import, eller flyttes til `archive/`
+Hvis du har kjørt migreringene tidligere, sjekk at disse er kjørt:
+1. `supabase/migrate-to-new-structure.sql` - Ny database-struktur
+2. `supabase/import-songs.sql` - Import av 7 sanger
+3. `supabase/fix-public-access.sql` - Offentlig lesing av sanger
+4. `supabase/add-nickname-column.sql` - Kallenavn-kolonne
+5. `supabase/add-roles-system.sql` - Rollehåndtering (admin + editor)
+
+## 🔗 Nyttige lenker
+- Live: https://ingve.com
+- Supabase Dashboard: https://supabase.com/dashboard
+- GitHub Repo: https://github.com/FreyBear/KorTone
+- GitHub Actions: https://github.com/FreyBear/KorTone/actions
