@@ -51,6 +51,8 @@ Detaljer ligger i docs/DEPLOYMENT_ONE_COM.md.
 
 ## Miljovariabler
 Se .env.example for forventede variabler.
+For Supabase: bruk NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY som standard.
+NEXT_PUBLIC_SUPABASE_ANON_KEY kan brukes som fallback i eldre oppsett.
 
 ## Planlagte filer i dette grunnlaget
 - SPEC.md: konkret funksjonell og teknisk spesifikasjon.

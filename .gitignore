@@ -1,0 +1,15 @@
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+
+# Keep template file tracked
+!.env.example
+node_modules
