@@ -75,7 +75,7 @@ export function SongCard({ song }: SongCardProps) {
             aria-pressed={activeVoice === voice}
             className={`min-h-11 min-w-11 rounded-lg border px-4 py-2 text-sm font-semibold transition-all ${
               activeVoice === voice
-                ? 'scale-[1.03] border-indigo-500 bg-indigo-600 text-white shadow-md ring-2 ring-indigo-300 dark:border-indigo-400 dark:bg-indigo-500 dark:ring-indigo-700'
+                ? 'scale-105 border-emerald-500 bg-emerald-500 text-white shadow-lg ring-4 ring-emerald-200 dark:border-emerald-400 dark:bg-emerald-500 dark:ring-emerald-900'
                 : 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
             }`}
           >
@@ -93,6 +93,10 @@ export function SongCard({ song }: SongCardProps) {
           {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
         </button>
       </div>
+
+      <p className="mt-3 min-h-5 text-xs font-medium text-emerald-700 dark:text-emerald-300" aria-live="polite">
+        {activeVoice ? `Spiller na: ${activeVoice}` : '\u00a0'}
+      </p>
     </article>
   );
 }
