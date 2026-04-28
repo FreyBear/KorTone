@@ -13,19 +13,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Preflight check
+        id: preflight
+        run: |
+          if [[ -f "package.json" && -f "package-lock.json" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Node project detected. Running build and deploy."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping build/deploy: missing package.json and/or package-lock.json."
+          fi
+
       - name: Setup Node
+        if: steps.preflight.outputs.ready == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
+        if: steps.preflight.outputs.ready == 'true'
         run: npm ci
 
       - name: Build static site
+        if: steps.preflight.outputs.ready == 'true'
         run: npm run build
 
       - name: Deploy via FTP
+        if: steps.preflight.outputs.ready == 'true'
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.ONECOM_HOST }}
@@ -35,3 +50,9 @@ jobs:
           local-dir: ./out/
           server-dir: ${{ secrets.ONECOM_REMOTE_PATH || '/' }}
           dangerous-clean-slate: false
+
+      - name: Workflow notice
+        if: steps.preflight.outputs.ready != 'true'
+        run: |
+          echo "Workflow completed without deploy."
+          echo "Add project files and push again when app scaffolding is ready."
