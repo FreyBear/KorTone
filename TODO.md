@@ -39,10 +39,20 @@
 
 ### Audio & Playback
 - [x] Sequence-playback fungerer (A C F A spiller riktig)
-- [x] Oktav-mapping for stemmer (T=oktav 3, B=oktav 2)
+- [x] Oktav-mapping for stemmer: S=4, A=4, T=3, B=3
+- [x] Bass og Tenor spiller i samme oktav (oktav 3)
 - [x] Default oktav 4 for noter uten oktav-spesifikasjon
+- [x] toNote() legger til stemme-spesifikk oktav automatisk
 
 ## 🔨 Gjenstående oppgaver
+
+### 0. Voice arrangement system (under diskusjon)
+- [ ] Støtte for nummererte stemmer (S1, S2, A1, A2, T1, T2, B1, B2)
+- [ ] Fleksibel Voice type (string i stedet for enum 'S'|'A'|'T'|'B')
+- [ ] Komplekse arrangements (ASSA = A1,S1,S2,A2; TTBB = T1,T2,B1,B2)
+- [ ] Intelligent oktav-gjetting basert på stemme-prefix (S* → 4, A* → 4, T* → 3, B* → 3)
+- [ ] Oppdater sortPitches() for å håndtere nummererte stemmer
+- [ ] Oppdater SongCard for å vise korrekte stemmeknapper
 
 ### 1. Sang-administrasjon
 - [ ] "Legg til ny sang"-funksjon (tom form → lagre til database)

@@ -1,103 +1,190 @@
-# Supabase CLI
+# KorTone 🎵
 
-[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=develop)](https://coveralls.io/github/supabase/cli?branch=develop) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
-](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
+Digital stemmegaffel for kor - utviklet for å gi korister og dirigenter rask tilgang til toner og sekvenser.
 
-[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
+## 🌐 Live versjon
+**https://ingve.com**
 
-This repository contains all the functionality for Supabase CLI.
+## 📋 Om prosjektet
 
-- [x] Running Supabase locally
-- [x] Managing database migrations
-- [x] Creating and deploying Supabase Functions
-- [x] Generating types directly from your database schema
-- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
+KorTone er en webapplikasjon som lar korister:
+- Søke etter sanger i korets repertoar
+- Spille av enkelttoner for hver stemme (Sopran, Alt, Tenor, Bass)
+- Avspille definerte sekvenser
+- Bruke en virtuell stemmegaffel (A=440Hz)
 
-## Getting started
+Admins og redaktører kan logge inn for å administrere sanglisten og brukere.
 
-### Install the CLI
+## 🏗️ Teknisk stack
 
-Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
+- **Frontend**: Next.js 16 (statisk export)
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth)
+- **Audio**: Tone.js
+- **Søk**: Fuse.js (fuzzy search)
+- **Hosting**: one.com (auto-deploy via GitHub Actions)
+- **Autentisering**: Google OAuth via Supabase
+
+## 🚀 Kom i gang
+
+### Forutsetninger
+- Node.js 18+ og npm
+- Supabase-prosjekt (gratis tier fungerer fint)
+- GitHub-konto for deployment
+
+### Installasjon
+
+1. Klon repoet:
+```bash
+git clone https://github.com/FreyBear/KorTone.git
+cd KorTone
+```
+
+2. Installer avhengigheter:
+```bash
+npm install
+```
+
+3. Sett opp miljøvariabler i `.env.local`:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xyz.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=din-legacy-anon-key
+```
+
+4. Sett opp database i Supabase SQL Editor:
+```bash
+# Kjør i rekkefølge:
+supabase/schema.sql
+supabase/policies.sql
+supabase/add-roles-system.sql
+```
+
+5. Importer sanger fra CSV:
+```bash
+node scripts/import-csv-to-supabase.js
+# Kopier output til Supabase SQL Editor og kjør
+```
+
+6. Start utviklingsserver:
+```bash
+npm run dev
+```
+
+Åpne [http://localhost:3000](http://localhost:3000)
+
+### Bygg for produksjon
 
 ```bash
-npm i supabase --save-dev
+npm run build
 ```
 
-When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
+Dette genererer statiske filer i `out/` som kan hostes hvor som helst.
+
+## 📁 Prosjektstruktur
 
 ```
-NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+KorTone/
+├── app/                    # Next.js app router
+│   ├── page.tsx           # Hovedside med sangliste
+│   ├── layout.tsx         # Root layout
+│   └── auth/callback/     # OAuth callback
+├── components/            # React-komponenter
+│   ├── AdminPanel.tsx     # Brukerhåndtering
+│   ├── EditSongModal.tsx  # Redigering av sanger
+│   ├── SearchBar.tsx      # Søkefelt
+│   ├── SongCard.tsx       # Sangvisning
+│   └── TuningForkFab.tsx  # Stemmegaffel-knapp
+├── lib/                   # Kjernefunksjonalitet
+│   ├── audio.ts           # Tone.js lydavspilling
+│   ├── supabase.ts        # Supabase-klient
+│   ├── types.ts           # TypeScript-typer
+│   └── songData.ts        # Sangdatahåndtering
+├── supabase/              # Database-skjema og policyer
+│   ├── schema.sql         # Tabelldefinisjoner
+│   ├── policies.sql       # Row Level Security
+│   └── add-roles-system.sql  # Rollehåndtering
+├── scripts/               # Verktøy
+│   └── import-csv-to-supabase.js  # CSV→SQL-konverter
+└── data/                  # Datakilder
+    └── sanger.csv         # Sangliste (CSV)
 ```
 
-> **Note**
-For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+## 🔐 Roller og tilgang
 
-<details>
-  <summary><b>macOS</b></summary>
+- **Anonym bruker**: Kan se alle sanger og spille av lyd
+- **Innlogget bruker**: Samme som anonym (foreløpig)
+- **Redaktør (editor)**: Kan redigere sanger
+- **Admin**: Kan redigere sanger + administrere brukere og roller
 
-  Available via [Homebrew](https://brew.sh). To install:
+## 🎵 CSV-format for sanger
 
-  ```sh
-  brew install supabase/tap/supabase
-  ```
+```csv
+Sang,Stemmer,Starttone,toneart,bpm
+Helan,SATB,A F A F,F-dur,135
+Halvan,TTBB,D C Bb A,F-dur,120
+```
 
-  To install the beta release channel:
-  
-  ```sh
-  brew install supabase/tap/supabase-beta
-  brew link --overwrite supabase-beta
-  ```
-  
-  To upgrade:
+- **Sang**: Tittel
+- **Stemmer**: SATB, TTBB, Unison, etc.
+- **Starttone**: Sekvens av noter (mellomrom-separert)
+- **toneart**: Nøkkel/toneart (valgfri)
+- **bpm**: Tempo
 
-  ```sh
-  brew upgrade supabase
-  ```
-</details>
+## 🚢 Deployment
 
-<details>
-  <summary><b>Windows</b></summary>
+Appen deployes automatisk til one.com via GitHub Actions når du pusher til `main`.
 
-  Available via [Scoop](https://scoop.sh). To install:
+### Nødvendige GitHub Secrets:
+- `SSH_HOST`: one.com SSH-server
+- `SSH_USERNAME`: SSH-bruker
+- `SSH_KEY`: SSH private key
+- `REMOTE_DIR`: Katalog på serveren (f.eks. `/home/ingve/public_html`)
+- `NEXT_PUBLIC_SUPABASE_URL`: Supabase URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Supabase Legacy Anon Key
 
-  ```powershell
-  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-  scoop install supabase
-  ```
+Deployment tar typisk 45-55 sekunder.
 
-  To upgrade:
+## 📝 SQL-migreringer
 
-  ```powershell
-  scoop update supabase
-  ```
-</details>
+Hvis du setter opp et nytt Supabase-prosjekt, kjør:
 
-<details>
-  <summary><b>Linux</b></summary>
+1. `supabase/schema.sql` - Oppretter `songs` og `user_roles` tabeller
+2. `supabase/policies.sql` - Row Level Security med funksjoner
+3. `supabase/add-roles-system.sql` - Rollehåndtering (admin + editor)
+4. `supabase/import-songs.sql` - (valgfri) Importerer 7 eksempelsanger
 
-  Available via [Homebrew](https://brew.sh) and Linux packages.
+## 🎹 Audiomotor
 
-  #### via Homebrew
+KorTone bruker Tone.js med følgende oktav-mapping:
+- **Sopran (S)**: Oktav 4 (C4 = middle C)
+- **Alt (A)**: Oktav 4
+- **Tenor (T)**: Oktav 3
+- **Bass (B)**: Oktav 3
 
-  To install:
+Hvis en note ikke har spesifisert oktav (f.eks. "C" i stedet for "C4"), legges standard oktav til basert på stemmen.
 
-  ```sh
-  brew install supabase/tap/supabase
-  ```
+## 🤝 Bidra
 
-  To upgrade:
+1. Fork repoet
+2. Opprett en feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit endringene dine (`git commit -m 'Add some AmazingFeature'`)
+4. Push til branchen (`git push origin feature/AmazingFeature`)
+5. Åpne en Pull Request
 
-  ```sh
-  brew upgrade supabase
-  ```
+## 📄 Lisens
 
-  #### via Linux packages
+Dette prosjektet er privat og eies av FreyBear.
 
-  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+## 🔗 Lenker
 
-  ```sh
-  sudo apk add --allow-untrusted <...>.apk
-  ```
+- **Live site**: https://ingve.com
+- **Supabase Dashboard**: https://supabase.com/dashboard
+- **GitHub Repo**: https://github.com/FreyBear/KorTone
+- **GitHub Actions**: https://github.com/FreyBear/KorTone/actions
+
+## 📞 Kontakt
+
+For spørsmål eller support, kontakt prosjekteier via GitHub
 
   ```sh
   sudo dpkg -i <...>.deb

@@ -56,7 +56,7 @@
 ## 4. Funksjonelle krav
 ### 4.1 Sok
 - Sok skal reagere fortlopende ved input.
-- Sok skal matche i title, nickname og lyrics_snippet.
+- Sok skal matche i title, nickname, voices og key_signature.
 - Fuzzy matching med Fuse.js.
 
 ### 4.2 Lyd
@@ -64,40 +64,55 @@
 - Spill sekvens spiller i lagret rekkefolge.
 - Sekvensoppstart viser aktiv stemme fortlopende i UI.
 - Standard instrument ved forste last: Piano.
+- Oktav-mapping for stemmer:
+  - Sopran (S): Oktav 4
+  - Alt (A): Oktav 4
+  - Tenor (T): Oktav 3
+  - Bass (B): Oktav 3
+- Noter uten eksplisitt oktav får automatisk stemme-spesifikk oktav.
 
 ### 4.3 Stemmegaffel
 - FAB starter A4 (440Hz) nar knapp holdes inne.
 - FAB slipper tonen med fade-out nar knapp slippes.
 - Skal fungere for mus (down/up/leave) og touch (start/end).
 
-### 4.4 Admin
+### 4.4 Admin og roller
 - Innlogging via Supabase Auth med Google.
-- Adminrolle verifiseres mot user_roles-tabell.
-- Kun admin kan opprette/endre sanger.
+- To roller: admin og editor (redaktør).
+- Admin kan administrere brukere og gi roller.
+- Både admin og editor kan opprette/endre sanger.
+- Kun admin kan slette sanger og administrere brukere.
 
 ## 5. Datamodell (Supabase)
 ### 5.1 Tabell songs
 - id (uuid, pk)
 - title (text, not null)
-- nickname (text)
-- lyrics_snippet (text)
-- tempo_bpm (int)
-- sequence (text[])
-- pitches (jsonb)
-- dropbox_url (text)
+- nickname (text) - søkbart kallenavn, vises ikke i UI
+- voices (text, not null) - f.eks. "SATB", "TTBB", "Unison"
+- sequence (text[]) - array av noter for sekvensavspilling
+- pitches (jsonb) - mapping av stemmer til toner, f.eks. {"S":"C4","A":"A3","T":"F3","B":"D3"}
+- key_signature (text) - toneart, f.eks. "F-dur", "C-dur"
+- tempo_bpm (int, not null) - tempo i beats per minutt
 - created_at (timestamptz)
 - updated_at (timestamptz)
 
 ### 5.2 Tabell user_roles
 - user_id (uuid, pk, referanse til auth.users)
-- role (text, forventet verdi: admin)
+- role (text, CHECK constraint: "admin" eller "editor")
 - created_at (timestamptz)
+
+### 5.3 Funksjoner
+- is_admin() - returnerer boolean om innlogget bruker er admin
+- is_editor() - returnerer boolean om innlogget bruker er editor
+- can_edit_songs() - returnerer boolean om bruker kan redigere (admin ELLER editor)
+- get_all_users_with_roles() - SECURITY DEFINER funksjon for admin å hente brukerliste
 
 ## 6. Sikkerhet
 - Row Level Security aktiv pa songs og user_roles.
-- Lesing av songs: tillatt for autentiserte brukere.
-- Skriving til songs: kun brukere med adminrolle.
-- user_roles oppdateres kun av service role eller dedikert adminflyt.
+- Lesing av songs: tillatt for alle (også anonyme brukere).
+- Oppretting/oppdatering av songs: kun brukere med admin- eller editor-rolle.
+- Sletting av songs: kun admin.
+- user_roles: kun admin kan liste alle brukere og administrere roller.
 
 ## 7. Teknisk arkitektur
 - Frontend: Next.js statisk eksport.
