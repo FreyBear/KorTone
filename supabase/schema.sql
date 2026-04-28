@@ -6,12 +6,11 @@ create extension if not exists pgcrypto;
 create table if not exists public.songs (
   id uuid primary key default gen_random_uuid(),
   title text not null,
-  nickname text,
-  lyrics_snippet text,
-  tempo_bpm int,
+  voices text not null default 'SATB',
   sequence text[] not null default '{}',
   pitches jsonb not null default '{}'::jsonb,
-  dropbox_url text,
+  key_signature text,
+  tempo_bpm int not null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -23,7 +22,7 @@ create table if not exists public.user_roles (
 );
 
 create index if not exists songs_title_idx on public.songs using btree (title);
-create index if not exists songs_nickname_idx on public.songs using btree (nickname);
+create index if not exists songs_voices_idx on public.songs using btree (voices);
 create index if not exists songs_pitches_gin_idx on public.songs using gin (pitches);
 
 create or replace function public.set_updated_at()

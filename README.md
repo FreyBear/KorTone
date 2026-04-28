@@ -1,57 +1,177 @@
-# KorTone - Digital stemmegaffel for ingve.com
+# Supabase CLI
 
-KorTone er en mobil-forst webapp for korister. Løsningen gir rask tilgang til starttoner per stemme, sekvensavspilling og stemmegaffel (A440).
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=develop)](https://coveralls.io/github/supabase/cli?branch=develop) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-## Status na
-- Appen er bygget og deployes automatisk til one.com via GitHub Actions.
-- Produksjon kjører pa www.ingve.com.
-- 51 sanger fra CSV er konvertert til app-format og brukt som fallback-data.
-- Lint og build er gronne i repo.
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-## Ferdige funksjoner
-- Sokevisning med live-filter i tittel, kallenavn og tekstutdrag.
-- Avspilling av enkel stemmetone (S, A, T, B).
-- Avspilling av sekvens per sang.
-- Visuell utheving av aktiv stemmeknapp under avspilling.
-- Mobiljustert knappelayout (kvadratiske stemmeknapper, egen rad for Spill sekvens).
-- Stemmegaffel-knapp: spiller sa lenge knappen holdes inne, fader ut nar knappen slippes.
-- Dark mode-toggle.
-- Eget favicon med musikknote.
+This repository contains all the functionality for Supabase CLI.
 
-## Teknologistack
-- Frontend: Next.js (App Router) med statisk eksport.
-- Styling: Tailwind CSS.
-- Lyd: Tone.js.
-- Sok: Fuse.js.
-- Backend: Supabase-klient (med fallback til lokale data).
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-## Data og import
-- Kilde: sanger.csv i repo-roten.
-- Konverteringsscript: scripts/parse-sanger.js.
-- Generert bibliotek: data/sanger-library.json.
-- Fallback i appen: lib/songData.ts leser data/sanger-library.json.
+## Getting started
 
-## Deploy
-- Workflow: .github/workflows/deploy-onecom.yml.
-- Bygg: npm ci + npm run build.
-- Opplasting: SSH + rsync til one.com webroot.
-- Rydding av gamle filer: rsync med --delete.
-- Root-oppsel pa one.com styres via public/.htaccess.
+### Install the CLI
 
-## Miljovariabler
-Se .env.example for forventede variabler.
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
-Supabase:
-- NEXT_PUBLIC_SUPABASE_URL
-- NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (anbefalt)
-- NEXT_PUBLIC_SUPABASE_ANON_KEY (fallback)
+```bash
+npm i supabase --save-dev
+```
 
-## Gjenstaende arbeid (MVP)
-- Kjore supabase/schema.sql og supabase/policies.sql i Supabase.
-- Aktivere Google Auth-provider i Supabase.
-- Legge inn admin-bruker i user_roles.
-- Implementere admin-innlogging og inline redigering i UI.
-- Importere data til songs-tabellen (i stedet for kun fallback JSON).
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-## Viktig om samtalelogger
-Chat i Codespaces bor ikke vaere eneste kilde til historikk. Behold viktige beslutninger i repo-filer (README, SPEC, commits), siden de er den tryggeste langsiktige dokumentasjonen.
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
+
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+
+<details>
+  <summary><b>macOS</b></summary>
+
+  Available via [Homebrew](https://brew.sh). To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Windows</b></summary>
+
+  Available via [Scoop](https://scoop.sh). To install:
+
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
+
+  To upgrade:
+
+  ```powershell
+  scoop update supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Linux</b></summary>
+
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```

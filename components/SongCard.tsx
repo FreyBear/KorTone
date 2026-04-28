@@ -49,7 +49,6 @@ export function SongCard({ song }: SongCardProps) {
     setIsPlayingSequence(true);
     try {
       await playSequence(song.sequence, song.pitches, song.tempo_bpm, {
-        onVoiceStart: (voice) => setActiveVoice(voice),
         onComplete: () => setActiveVoice(null),
       });
     } finally {
@@ -60,10 +59,12 @@ export function SongCard({ song }: SongCardProps) {
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
-      <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">{song.title}</h2>
-      {song.nickname ? <p className="mt-1 text-xs text-slate-500">{song.nickname}</p> : null}
-      {song.lyrics_snippet ? (
-        <p className="mt-2 line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{song.lyrics_snippet}</p>
+      <div className="flex items-baseline justify-between gap-2">
+        <h2 className="text-base font-semibold text-slate-900 dark:text-slate-50">{song.title}</h2>
+        <span className="shrink-0 text-xs font-medium text-slate-500 dark:text-slate-400">{song.voices}</span>
+      </div>
+      {song.key_signature ? (
+        <p className="mt-1 text-xs text-slate-500">{song.key_signature} · {song.tempo_bpm} BPM</p>
       ) : null}
 
       <div className="mt-4 space-y-2">

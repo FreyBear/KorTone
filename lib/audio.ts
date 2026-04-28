@@ -66,7 +66,15 @@ async function getSynth() {
   return synthPromises[mode];
 }
 
-async function toNote(value: string | undefined, fallbackMidi: number): Promise<string> {
+// Octave mapping for voices (Tenor and Bass are lower)
+const voiceOctave: Record<Voice, number> = {
+  S: 4,  // Soprano - middle octave
+  A: 4,  // Alto - middle octave  
+  T: 3,  // Tenor - one octave lower
+  B: 2,  // Bass - two octaves lower
+};
+
+async function toNote(value: string | undefined, fallbackMidi: number, voice?: Voice): Promise<string> {
   const Tone = await getTone();
 
   if (!value || value.trim().length === 0) {
@@ -77,6 +85,13 @@ async function toNote(value: string | undefined, fallbackMidi: number): Promise<
   const isSimpleNote = /^[A-G](#|B)?\d$/.test(normalized);
   if (isSimpleNote) {
     return normalized.replace('B', 'b');
+  }
+  
+  // If no octave specified, use voice-appropriate octave
+  const hasOctave = /\d$/.test(normalized);
+  if (!hasOctave && voice) {
+    const noteWithoutOctave = normalized.replace('B', 'b');
+    return `${noteWithoutOctave}${voiceOctave[voice]}`;
   }
 
   return Tone.Frequency(fallbackMidi, 'midi').toNote();
@@ -95,13 +110,13 @@ export async function playVoice(
   duration = '8n'
 ): Promise<void> {
   await primeAudioContext();
-  const note = await toNote(pitch, voiceMidi[voice]);
+  const note = await toNote(pitch, voiceMidi[voice], voice);
   const synth = await getSynth();
   synth.triggerAttackRelease(note, duration);
 }
 
 export async function playSequence(
-  sequence: Voice[],
+  sequence: string[],
   pitches: Partial<Record<Voice, string>>,
   tempoBpm?: number | null,
   options?: {
@@ -112,11 +127,13 @@ export async function playSequence(
   await primeAudioContext();
 
   const stepMs = tempoBpm && tempoBpm > 0 ? Math.round((60_000 / tempoBpm) * 0.8) : 520;
+  const synth = await getSynth();
 
   try {
-    for (const voice of sequence) {
-      options?.onVoiceStart?.(voice);
-      await playVoice(voice, pitches[voice], '8n');
+    for (const noteName of sequence) {
+      // Play each note in the sequence (use octave 4 as default if not specified)
+      const note = await toNote(noteName, 60); // 60 = C4
+      synth.triggerAttackRelease(note, '8n');
       await new Promise((resolve) => setTimeout(resolve, stepMs));
     }
   } finally {
