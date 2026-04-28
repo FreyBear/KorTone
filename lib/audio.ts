@@ -66,12 +66,12 @@ async function getSynth() {
   return synthPromises[mode];
 }
 
-// Octave mapping for voices (Tenor and Bass are lower)
+// Octave mapping for voices
 const voiceOctave: Record<Voice, number> = {
   S: 4,  // Soprano - middle octave
   A: 4,  // Alto - middle octave  
-  T: 3,  // Tenor - one octave lower
-  B: 2,  // Bass - two octaves lower
+  T: 3,  // Tenor - lower octave
+  B: 3,  // Bass - same as Tenor
 };
 
 async function toNote(value: string | undefined, fallbackMidi: number, voice?: Voice): Promise<string> {
