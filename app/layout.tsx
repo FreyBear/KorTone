@@ -10,6 +10,9 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'KorTone',
   description: 'Digital stemmegaffel for korister',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
