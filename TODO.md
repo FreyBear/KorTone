@@ -1,106 +1,66 @@
-# KorTone – Status og gjenstående oppgaver
+# KorTone - Status og neste steg
 
-## ✅ Fullført (Januar 2026)
+## Sist oppdatert
+- 2026-04-29
 
-### Database & Infrastruktur
-- [x] Opprettet Supabase-prosjekt
-- [x] Kjørt `supabase/schema.sql` (tabeller: `songs`, `user_roles`)
-- [x] Kjørt `supabase/policies.sql` (Row Level Security)
-- [x] Satt opp miljøvariabler i GitHub Secrets
-- [x] Appen henter live data fra Supabase
-- [x] Auto-deployment via GitHub Actions til one.com
+## Fullfort nylig
 
-### Autentisering
-- [x] Google OAuth fungerer via Supabase
-- [x] Redirect URLs konfigurert (`https://ingve.com/auth/callback`)
-- [x] Diskret auth UI (text links under header)
-- [x] Logg ut-funksjonalitet
+### Produkt og UI
+- [x] Brand oppdatert i header: "Asta La Vista"
+- [x] Mobilvennlig header-layout (kontroller wraper pa sma skjermer)
+- [x] Mork modus-forbedring for lydvelger dropdown (bedre kontrast)
 
-### Sanger & Data
-- [x] Ny database-struktur basert på CSV (`sanger.csv`)
-- [x] Kolonnner: `title`, `nickname`, `voices`, `sequence`, `pitches`, `key_signature`, `tempo_bpm`
-- [x] Import-script: `scripts/import-csv-to-supabase.js`
-- [x] 7 sanger importert (Helan, Helan går, Akademisk bordvers, etc.)
-- [x] Søkbart kallenavn-felt (vises ikke i UI)
-- [x] Offentlig visning (alle kan se sanger uten innlogging)
+### Roller og administrasjon
+- [x] Stotte for roller: `admin` og `editor`
+- [x] AdminPanel for bruker- og rolleadministrasjon
+- [x] Redaktor/admin kan redigere sanger i UI
+- [x] Redaktor/admin kan opprette nye sanger i UI (`AddSongModal`)
 
-### Admin & Roller
-- [x] Rollehåndtering: `admin` og `editor` (redaktør)
-- [x] AdminPanel-komponent for brukerhåndtering
-- [x] Admin kan se alle brukere og tildele roller
-- [x] Editor kan redigere sanger, men ikke administrere brukere
-- [x] RLS policies oppdatert for begge roller
+### Sanger og avspilling
+- [x] Dynamiske stemmeknapper basert pa `pitches`-nokkler
+- [x] Naturlig stemmerekkefolge i UI: S1, S2, S, A1, A2, A, T1, T2, T, Bar, B1, B2, B
+- [x] Sekvensformat stotter varighet per note (`C4:2n`, `A4:4n`)
+- [x] Bakoverkompatibilitet for sekvens: token uten varighet tolkes som `:4n`
+- [x] Pauser i sekvens stottes (`R:4n` eller `REST:4n`)
 
-### Redigering
-- [x] EditSongModal for admin/editor
-- [x] Kan redigere: tittel, kallenavn, voices, sekvens, toneart, BPM, pitches
-- [x] Dialog lukker automatisk etter vellykket lagring
-- [x] Feilhåndtering med tydelige meldinger
+### Lydmotor
+- [x] Sampler-basert flygel (Salamander) som standard
+- [x] Flere lydmoduser: `grandPiano`, `stringsPad`, `electricPiano`, `organ`, `sine`
+- [x] Erstattet `choirPad` med `stringsPad`
+- [x] Legacy mapping i localStorage (eldre verdier mappes automatisk)
 
-### Audio & Playback
-- [x] Sequence-playback fungerer (A C F A spiller riktig)
-- [x] Oktav-mapping for stemmer: S=4, A=4, T=3, B=3
-- [x] Bass og Tenor spiller i samme oktav (oktav 3)
-- [x] Default oktav 4 for noter uten oktav-spesifikasjon
-- [x] toNote() legger til stemme-spesifikk oktav automatisk
+### CI/CD
+- [x] Fix for build-feil i audio-typing
+- [x] Oppdatert GitHub Actions til `actions/checkout@v5` og `actions/setup-node@v5`
+- [x] Node 24 runtime for JavaScript actions i workflow
 
-## 🔨 Gjenstående oppgaver
+## Gjenstaende oppgaver
 
-### 0. Voice arrangement system (under diskusjon)
-- [ ] Støtte for nummererte stemmer (S1, S2, A1, A2, T1, T2, B1, B2)
-- [ ] Fleksibel Voice type (string i stedet for enum 'S'|'A'|'T'|'B')
-- [ ] Komplekse arrangements (ASSA = A1,S1,S2,A2; TTBB = T1,T2,B1,B2)
-- [ ] Intelligent oktav-gjetting basert på stemme-prefix (S* → 4, A* → 4, T* → 3, B* → 3)
-- [ ] Oppdater sortPitches() for å håndtere nummererte stemmer
-- [ ] Oppdater SongCard for å vise korrekte stemmeknapper
+### Hoy prioritet
+- [ ] Legg til slett sang-funksjon (kun admin) med bekreftelsesdialog
+- [ ] Bedre validering i "Ny sang"/"Rediger sang" (sekvensformat, pitches-struktur)
+- [ ] Erstatt `alert()` med toast-varsler for bedre UX
 
-### 1. Sang-administrasjon
-- [ ] "Legg til ny sang"-funksjon (tom form → lagre til database)
-- [ ] Slett sang-funksjonalitet (med bekreftelsesdialog, kun admin)
-- [ ] Bulk-import fra CSV via admin-panel
-- [ ] Validering av `sequence` array (gyldige noter)
-- [ ] Validering av `pitches` JSON format
+### Medium prioritet
+- [ ] Filter pa stemmetype (`voices`) og toneart
+- [ ] Duplikatsjekk ved oppretting av ny sang (f.eks. tittel + voices)
+- [ ] Forbedret mobilvisning i AdminPanel
+- [ ] Volumkontroll for avspilling
 
-### 2. Audio-forbedringer
-- [ ] Metronom-funksjon (global eller per sang)
-- [ ] Velg oktav for sequence-playback per sang
-- [ ] Justere lengde/duration på sequence-noter
-- [ ] Volume-kontroll
+### Lav prioritet
+- [ ] Bulk-import i UI (CSV/JSON) for redaktor/admin
+- [ ] Historikk/favoritter per bruker
+- [ ] Keyboard shortcuts for avspilling
 
-### 3. UX-forbedringer
-- [ ] Loading-tilstand på "Spill sekvens"-knapp
-- [ ] Optimistisk oppdatering av sangliste etter lagring
-- [ ] Bedre mobile-visning for AdminPanel
-- [ ] Keyboard shortcuts (space = play sequence, etc.)
-- [ ] Toast-meldinger i stedet for alert()
+## Drift og SQL
 
-### 4. Søk & Filter
-- [ ] Filter på voices (SATB, TTBB, Unison)
-- [ ] Filter på toneart
-- [ ] Sortering (alfabetisk, nyeste først, etc.)
+For nytt miljo/prosjekt, verifiser at disse er kjort i Supabase:
+1. `supabase/schema.sql`
+2. `supabase/policies.sql`
+3. `supabase/add-roles-system.sql`
+4. `supabase/fix-admin-access.sql` (hvis behov i eksisterende miljo)
 
-### 5. Datamigrering
-- [ ] Vurder om `sanger.csv` skal arkiveres etter import
-- [ ] Fjern `data/sanger-library.json` (ikke lenger i bruk)
-- [ ] Dokumenter CSV-format for fremtidige importer
-
-### 6. Diverse
-- [ ] Legg til "Om"-side med info om appen
-- [ ] Eksporter sangliste til PDF/CSV
-- [ ] Sanghistorikk (sist spilte sanger)
-- [ ] Favoritter-funksjon per bruker
-
-## 📝 SQL-scripts å kjøre i Supabase
-
-Hvis du har kjørt migreringene tidligere, sjekk at disse er kjørt:
-1. `supabase/migrate-to-new-structure.sql` - Ny database-struktur
-2. `supabase/import-songs.sql` - Import av 7 sanger
-3. `supabase/fix-public-access.sql` - Offentlig lesing av sanger
-4. `supabase/add-nickname-column.sql` - Kallenavn-kolonne
-5. `supabase/add-roles-system.sql` - Rollehåndtering (admin + editor)
-
-## 🔗 Nyttige lenker
+## Nyttige lenker
 - Live: https://ingve.com
-- Supabase Dashboard: https://supabase.com/dashboard
-- GitHub Repo: https://github.com/FreyBear/KorTone
-- GitHub Actions: https://github.com/FreyBear/KorTone/actions
+- Repo: https://github.com/FreyBear/KorTone
+- Actions: https://github.com/FreyBear/KorTone/actions
