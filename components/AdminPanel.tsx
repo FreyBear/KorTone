@@ -43,7 +43,11 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (rpcError) {
         console.error('Error loading users:', rpcError);
-        setError(`Kunne ikke laste brukere: ${rpcError.message}`);
+        if (rpcError.message.includes('get_all_users_with_roles')) {
+          setError('Kunne ikke laste brukere: mangler SQL-funksjonen get_all_users_with_roles(). Kjør supabase/add-roles-system.sql eller supabase/policies.sql i Supabase SQL Editor.');
+        } else {
+          setError(`Kunne ikke laste brukere: ${rpcError.message}`);
+        }
       } else {
         setUsers(data || []);
       }

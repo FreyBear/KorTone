@@ -9,6 +9,8 @@ create or replace function public.is_admin()
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
   select exists (
     select 1
@@ -22,6 +24,8 @@ create or replace function public.can_edit_songs()
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
   select exists (
     select 1
@@ -30,6 +34,40 @@ as $$
       and ur.role in ('admin', 'editor')
   );
 $$;
+
+create or replace function public.get_all_users_with_roles()
+returns table (
+  user_id uuid,
+  email text,
+  created_at timestamptz,
+  last_sign_in_at timestamptz,
+  role text
+)
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Kun admin kan hente brukerliste';
+  end if;
+
+  return query
+  select
+    u.id as user_id,
+    u.email,
+    u.created_at,
+    u.last_sign_in_at,
+    ur.role
+  from auth.users u
+  left join public.user_roles ur on u.id = ur.user_id
+  order by u.created_at desc;
+end;
+$$;
+
+grant execute on function public.is_admin() to authenticated;
+grant execute on function public.can_edit_songs() to authenticated;
+grant execute on function public.get_all_users_with_roles() to authenticated;
 
 -- Songs policies (everyone can read, editor/admin can write)
 drop policy if exists "songs_select_all" on public.songs;

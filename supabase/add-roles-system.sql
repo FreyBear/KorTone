@@ -14,6 +14,8 @@ CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -27,6 +29,8 @@ CREATE OR REPLACE FUNCTION public.is_editor()
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -40,6 +44,8 @@ CREATE OR REPLACE FUNCTION public.can_edit_songs()
 RETURNS boolean
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1
@@ -114,6 +120,7 @@ RETURNS TABLE (
 )
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, auth
 AS $$
 BEGIN
   -- Sjekk at brukeren er admin
@@ -133,6 +140,11 @@ BEGIN
   ORDER BY u.created_at DESC;
 END;
 $$;
+
+GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_editor() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.can_edit_songs() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_all_users_with_roles() TO authenticated;
 
 -- Ferdig! Nå har du:
 -- ✅ 'admin' rolle: Full tilgang
