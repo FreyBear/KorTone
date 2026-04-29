@@ -184,7 +184,7 @@ export default function Home() {
     <main className="mx-auto min-h-screen max-w-2xl pb-24">
       <header className="flex items-center justify-between px-4 pt-5">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-indigo-600">KorTone</p>
+          <p className="text-xs uppercase tracking-[0.24em] text-indigo-600">Åsta La Vista</p>
           <h1 className="text-2xl font-bold">Digital stemmegaffel</h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {status}
