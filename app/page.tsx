@@ -2,6 +2,7 @@
 
 import Fuse from 'fuse.js';
 import { useEffect, useMemo, useState } from 'react';
+import { AddSongModal } from '@/components/AddSongModal';
 import { SearchBar } from '@/components/SearchBar';
 import { SongCard } from '@/components/SongCard';
 import { SoundModeSelect } from '@/components/SoundModeSelect';
@@ -233,6 +234,7 @@ export default function Home() {
           </p>
         </div>
         <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+          <AddSongModal canEdit={canEdit} onSongAdded={reloadSongs} />
           {isAdmin && (
             <button
               onClick={() => setAdminPanelOpen(true)}
