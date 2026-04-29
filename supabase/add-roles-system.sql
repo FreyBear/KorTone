@@ -131,10 +131,10 @@ BEGIN
   RETURN QUERY
   SELECT 
     u.id AS user_id,
-    u.email,
+    u.email::text,
     u.created_at,
     u.last_sign_in_at,
-    ur.role
+    ur.role::text
   FROM auth.users u
   LEFT JOIN public.user_roles ur ON u.id = ur.user_id
   ORDER BY u.created_at DESC;

@@ -55,10 +55,10 @@ begin
   return query
   select
     u.id as user_id,
-    u.email,
+    u.email::text,
     u.created_at,
     u.last_sign_in_at,
-    ur.role
+    ur.role::text
   from auth.users u
   left join public.user_roles ur on u.id = ur.user_id
   order by u.created_at desc;
