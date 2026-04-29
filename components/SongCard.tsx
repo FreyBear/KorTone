@@ -6,7 +6,17 @@ import { playSequence, playVoice } from '@/lib/audio';
 import type { Song, Voice } from '@/lib/types';
 import { EditSongModal } from './EditSongModal';
 
-
+const VOICE_ORDER = ['S1', 'S2', 'S', 'A1', 'A2', 'A', 'T1', 'T2', 'T', 'Bar', 'B1', 'B2', 'B'];
+function sortVoices(voices: string[]): string[] {
+  return [...voices].sort((a, b) => {
+    const ai = VOICE_ORDER.indexOf(a);
+    const bi = VOICE_ORDER.indexOf(b);
+    if (ai === -1 && bi === -1) return a.localeCompare(b);
+    if (ai === -1) return 1;
+    if (bi === -1) return -1;
+    return ai - bi;
+  });
+}
 
 type SongCardProps = {
   song: Song;
@@ -77,7 +87,7 @@ export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps
 
       <div className="mt-4 space-y-2">
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {Object.keys(song.pitches).map((voice) => (
+          {sortVoices(Object.keys(song.pitches)).map((voice) => (
             <button
               key={voice}
               type="button"
