@@ -6,7 +6,7 @@ import { playSequence, playVoice } from '@/lib/audio';
 import type { Song, Voice } from '@/lib/types';
 import { EditSongModal } from './EditSongModal';
 
-const orderedVoices: Voice[] = ['S', 'A', 'T', 'B'];
+
 
 type SongCardProps = {
   song: Song;
@@ -77,7 +77,7 @@ export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps
 
       <div className="mt-4 space-y-2">
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {orderedVoices.map((voice) => (
+          {Object.keys(song.pitches).map((voice) => (
             <button
               key={voice}
               type="button"
