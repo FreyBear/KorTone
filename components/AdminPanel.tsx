@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Users, Shield, Edit3, X } from 'lucide-react';
 import { getSupabase } from '@/lib/supabase';
 
@@ -22,16 +22,10 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadUsers();
-    }
-  }, [isOpen]);
-
-  async function loadUsers() {
+  const loadUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const supabase = getSupabase();
       if (!supabase) {
@@ -57,7 +51,19 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const timeoutId = window.setTimeout(() => {
+        void loadUsers();
+      }, 0);
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
+    }
+    return undefined;
+  }, [isOpen, loadUsers]);
 
   async function setUserRole(userId: string, newRole: 'admin' | 'editor' | null) {
     const supabase = getSupabase();

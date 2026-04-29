@@ -17,6 +17,23 @@ import type { Song, SoundMode } from '@/lib/types';
 
 const soundStorageKey = 'kortone-sound-mode';
 
+function resolveInitialSoundMode(): SoundMode {
+  if (typeof window === 'undefined') {
+    return 'grandPiano';
+  }
+
+  const saved = window.localStorage.getItem(soundStorageKey);
+  if (saved === 'piano' || saved === 'grandPiano') {
+    return 'grandPiano';
+  }
+
+  if (saved === 'choirPad' || saved === 'electricPiano' || saved === 'sine' || saved === 'organ') {
+    return saved;
+  }
+
+  return 'grandPiano';
+}
+
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>(fallbackSongs);
   const [query, setQuery] = useState('');
@@ -25,20 +42,7 @@ export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [soundMode, setSoundModeState] = useState<SoundMode>('piano');
-
-  useEffect(() => {
-    setMounted(true);
-    
-    // Load sound mode from localStorage after mount
-    if (typeof window !== 'undefined') {
-      const saved = window.localStorage.getItem(soundStorageKey);
-      if (saved === 'piano' || saved === 'sine' || saved === 'organ') {
-        setSoundModeState(saved);
-      }
-    }
-  }, []);
+  const [soundMode, setSoundModeState] = useState<SoundMode>(resolveInitialSoundMode);
 
   useEffect(() => {
     setSoundMode(soundMode);
@@ -184,52 +188,48 @@ export default function Home() {
           <h1 className="text-2xl font-bold">Digital stemmegaffel</h1>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             {status}
-            {mounted && (
+            {' · '}
+            {session ? (
               <>
+                <span className="text-slate-600 dark:text-slate-300">
+                  {session.user.email}
+                </span>
                 {' · '}
-                {session ? (
-                  <>
-                    <span className="text-slate-600 dark:text-slate-300">
-                      {session.user.email}
-                    </span>
-                    {' · '}
-                    <button
-                      onClick={async () => {
-                        const supabase = getSupabase();
-                        if (supabase) {
-                          await supabase.auth.signOut();
-                          window.location.reload();
-                        }
-                      }}
-                      className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
-                    >
-                      logg ut
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={async () => {
-                      const supabase = getSupabase();
-                      if (supabase) {
-                        await supabase.auth.signInWithOAuth({
-                          provider: 'google',
-                          options: {
-                            redirectTo: `${window.location.origin}/auth/callback`,
-                          },
-                        });
-                      }
-                    }}
-                    className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
-                  >
-                    logg inn
-                  </button>
-                )}
+                <button
+                  onClick={async () => {
+                    const supabase = getSupabase();
+                    if (supabase) {
+                      await supabase.auth.signOut();
+                      window.location.reload();
+                    }
+                  }}
+                  className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
+                >
+                  logg ut
+                </button>
               </>
+            ) : (
+              <button
+                onClick={async () => {
+                  const supabase = getSupabase();
+                  if (supabase) {
+                    await supabase.auth.signInWithOAuth({
+                      provider: 'google',
+                      options: {
+                        redirectTo: `${window.location.origin}/auth/callback`,
+                      },
+                    });
+                  }
+                }}
+                className="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 underline"
+              >
+                logg inn
+              </button>
             )}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          {mounted && isAdmin && (
+          {isAdmin && (
             <button
               onClick={() => setAdminPanelOpen(true)}
               className="flex items-center gap-1 rounded-lg bg-purple-100 px-3 py-1.5 text-sm font-medium text-purple-700 transition hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:hover:bg-purple-900/50"

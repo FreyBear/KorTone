@@ -4,41 +4,24 @@ import { Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const [dark, setDark] = useState<boolean>(false);
+  const [dark, setDark] = useState<boolean>(() => {
+    if (typeof window === 'undefined') {
+      return false;
+    }
 
-  useEffect(() => {
-    // Only run on client after mount
     const storedTheme = window.localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setDark(storedTheme ? storedTheme === 'dark' : prefersDark);
-    setMounted(true);
-  }, []);
+    return storedTheme ? storedTheme === 'dark' : prefersDark;
+  });
 
   useEffect(() => {
-    if (!mounted) return;
     const root = document.documentElement;
     root.classList.toggle('dark', dark);
     window.localStorage.setItem('theme', dark ? 'dark' : 'light');
-  }, [dark, mounted]);
+  }, [dark]);
 
   function toggle() {
     setDark((current) => !current);
-  }
-
-  // Render a placeholder during SSR/SSG to avoid hydration mismatch
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
-        aria-label="Bytt tema"
-        disabled
-      >
-        <Moon size={14} />
-        Mork
-      </button>
-    );
   }
 
   return (

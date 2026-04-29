@@ -1,17 +1,49 @@
 import type { SoundMode, Voice } from '@/lib/types';
 
-const voiceMidi: Record<Voice, number> = {
-  S: 64,
-  A: 60,
-  T: 55,
-  B: 48,
-};
-
 type ToneModule = typeof import('tone');
 
+type PlayableInstrument = {
+  triggerAttackRelease: (note: string, duration: string) => void;
+  triggerAttack: (note: string) => void;
+  triggerRelease: (note: string) => void;
+};
+
+const SAMPLER_URLS: Record<string, string> = {
+  A0: 'A0.mp3',
+  C1: 'C1.mp3',
+  'D#1': 'Ds1.mp3',
+  'F#1': 'Fs1.mp3',
+  A1: 'A1.mp3',
+  C2: 'C2.mp3',
+  'D#2': 'Ds2.mp3',
+  'F#2': 'Fs2.mp3',
+  A2: 'A2.mp3',
+  C3: 'C3.mp3',
+  'D#3': 'Ds3.mp3',
+  'F#3': 'Fs3.mp3',
+  A3: 'A3.mp3',
+  C4: 'C4.mp3',
+  'D#4': 'Ds4.mp3',
+  'F#4': 'Fs4.mp3',
+  A4: 'A4.mp3',
+  C5: 'C5.mp3',
+  'D#5': 'Ds5.mp3',
+  'F#5': 'Fs5.mp3',
+  A5: 'A5.mp3',
+  C6: 'C6.mp3',
+  'D#6': 'Ds6.mp3',
+  'F#6': 'Fs6.mp3',
+  A6: 'A6.mp3',
+  C7: 'C7.mp3',
+  'D#7': 'Ds7.mp3',
+  'F#7': 'Fs7.mp3',
+  A7: 'A7.mp3',
+  C8: 'C8.mp3',
+};
+
 let tonePromise: Promise<ToneModule> | null = null;
-let currentSoundMode: SoundMode = 'piano';
-const synthPromises: Partial<Record<SoundMode, Promise<any>>> = {};
+let currentSoundMode: SoundMode = 'grandPiano';
+const instrumentPromises: Partial<Record<SoundMode, Promise<PlayableInstrument>>> = {};
 
 export function getSoundMode(): SoundMode {
   return currentSoundMode;
@@ -35,44 +67,97 @@ async function getTone(): Promise<ToneModule> {
   return tonePromise;
 }
 
-async function createSynth(mode: SoundMode) {
+function getVoiceFamily(voice: Voice): 'S' | 'A' | 'T' | 'BAR' | 'B' | 'OTHER' {
+  const normalized = voice.trim().toUpperCase();
+  if (normalized.startsWith('S')) return 'S';
+  if (normalized.startsWith('A')) return 'A';
+  if (normalized.startsWith('T')) return 'T';
+  if (normalized.startsWith('BAR')) return 'BAR';
+  if (normalized.startsWith('B')) return 'B';
+  return 'OTHER';
+}
+
+function getFallbackMidi(voice: Voice): number {
+  const family = getVoiceFamily(voice);
+  if (family === 'S') return 64;
+  if (family === 'A') return 60;
+  if (family === 'T') return 55;
+  if (family === 'BAR' || family === 'B') return 48;
+  return 60;
+}
+
+function getVoiceOctave(voice?: Voice): number {
+  if (!voice) return 4;
+
+  const family = getVoiceFamily(voice);
+  if (family === 'S' || family === 'A') return 4;
+  if (family === 'T' || family === 'BAR' || family === 'B') return 3;
+  return 4;
+}
+
+function createPolySynth(
+  Tone: ToneModule,
+  synthType: typeof Tone.Synth | typeof Tone.AMSynth | typeof Tone.FMSynth,
+  options: Record<string, unknown>
+): PlayableInstrument {
+  return new Tone.PolySynth(synthType, options).toDestination() as PlayableInstrument;
+}
+
+async function createInstrument(mode: SoundMode): Promise<PlayableInstrument> {
   const Tone = await getTone();
 
-  if (mode === 'sine') {
-    return new Tone.PolySynth(Tone.Synth, {
-      oscillator: { type: 'sine' },
-      envelope: { attack: 0.01, decay: 0.12, sustain: 0.5, release: 0.25 },
+  if (mode === 'grandPiano') {
+    const sampler = new Tone.Sampler({
+      urls: SAMPLER_URLS,
+      baseUrl: 'https://tonejs.github.io/audio/salamander/',
+      release: 1,
     }).toDestination();
+
+    await Tone.loaded();
+    return sampler as PlayableInstrument;
+  }
+
+  if (mode === 'choirPad') {
+    return createPolySynth(Tone, Tone.AMSynth, {
+      harmonicity: 1.8,
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.08, decay: 0.25, sustain: 0.75, release: 1.1 },
+      modulation: { type: 'triangle' },
+      modulationEnvelope: { attack: 0.2, decay: 0.15, sustain: 0.8, release: 1 },
+    });
+  }
+
+  if (mode === 'electricPiano') {
+    return createPolySynth(Tone, Tone.FMSynth, {
+      harmonicity: 3,
+      modulationIndex: 8,
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.01, decay: 0.15, sustain: 0.3, release: 0.8 },
+      modulation: { type: 'square' },
+      modulationEnvelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.5 },
+    });
   }
 
   if (mode === 'organ') {
-    return new Tone.PolySynth(Tone.Synth, {
+    return createPolySynth(Tone, Tone.Synth, {
       oscillator: { type: 'square8' },
       envelope: { attack: 0.01, decay: 0.05, sustain: 0.95, release: 0.25 },
-    }).toDestination();
+    });
   }
 
-  return new Tone.PolySynth(Tone.Synth, {
-    oscillator: { type: 'triangle' },
-    envelope: { attack: 0.01, decay: 0.3, sustain: 0.2, release: 1.2 },
-  }).toDestination();
+  return createPolySynth(Tone, Tone.Synth, {
+    oscillator: { type: 'sine' },
+    envelope: { attack: 0.01, decay: 0.12, sustain: 0.5, release: 0.25 },
+  });
 }
 
-async function getSynth() {
+async function getInstrument(): Promise<PlayableInstrument> {
   const mode = currentSoundMode;
-  if (!synthPromises[mode]) {
-    synthPromises[mode] = createSynth(mode);
+  if (!instrumentPromises[mode]) {
+    instrumentPromises[mode] = createInstrument(mode);
   }
-  return synthPromises[mode];
+  return instrumentPromises[mode] as Promise<PlayableInstrument>;
 }
-
-// Octave mapping for voices
-const voiceOctave: Record<Voice, number> = {
-  S: 4,  // Soprano - middle octave
-  A: 4,  // Alto - middle octave  
-  T: 3,  // Tenor - lower octave
-  B: 3,  // Bass - same as Tenor
-};
 
 async function toNote(value: string | undefined, fallbackMidi: number, voice?: Voice): Promise<string> {
   const Tone = await getTone();
@@ -81,22 +166,18 @@ async function toNote(value: string | undefined, fallbackMidi: number, voice?: V
     return Tone.Frequency(fallbackMidi, 'midi').toNote();
   }
 
-  const normalized = value.trim().toUpperCase();
-  const isSimpleNote = /^[A-G](#|B)?\d$/.test(normalized);
-  if (isSimpleNote) {
-    return normalized.replace('B', 'b');
-  }
-  
-  // If no octave specified, add one
-  const hasOctave = /\d$/.test(normalized);
-  if (!hasOctave) {
-    const noteWithoutOctave = normalized.replace('B', 'b');
-    // Use voice-appropriate octave if voice is specified, otherwise use octave 4
-    const octave = voice ? voiceOctave[voice] : 4;
-    return `${noteWithoutOctave}${octave}`;
+  const normalizedRaw = value.trim().toUpperCase();
+  const match = normalizedRaw.match(/^([A-GH])([#B]?)(\d?)$/);
+
+  if (!match) {
+    return Tone.Frequency(fallbackMidi, 'midi').toNote();
   }
 
-  return Tone.Frequency(fallbackMidi, 'midi').toNote();
+  const letter = match[1] === 'H' ? 'B' : match[1];
+  const accidental = match[2] === 'B' ? 'b' : match[2];
+  const octave = match[3] || `${getVoiceOctave(voice)}`;
+
+  return `${letter}${accidental}${octave}`;
 }
 
 export async function primeAudioContext(): Promise<void> {
@@ -112,9 +193,9 @@ export async function playVoice(
   duration = '8n'
 ): Promise<void> {
   await primeAudioContext();
-  const note = await toNote(pitch, voiceMidi[voice], voice);
-  const synth = await getSynth();
-  synth.triggerAttackRelease(note, duration);
+  const note = await toNote(pitch, getFallbackMidi(voice), voice);
+  const instrument = await getInstrument();
+  instrument.triggerAttackRelease(note, duration);
 }
 
 export async function playSequence(
@@ -129,13 +210,12 @@ export async function playSequence(
   await primeAudioContext();
 
   const stepMs = tempoBpm && tempoBpm > 0 ? Math.round((60_000 / tempoBpm) * 0.8) : 520;
-  const synth = await getSynth();
+  const instrument = await getInstrument();
 
   try {
     for (const noteName of sequence) {
-      // Play each note in the sequence (use octave 4 as default if not specified)
-      const note = await toNote(noteName, 60); // 60 = C4
-      synth.triggerAttackRelease(note, '8n');
+      const note = await toNote(noteName, 60);
+      instrument.triggerAttackRelease(note, '8n');
       await new Promise((resolve) => setTimeout(resolve, stepMs));
     }
   } finally {
@@ -145,11 +225,11 @@ export async function playSequence(
 
 export async function holdTuningForkA(): Promise<void> {
   await primeAudioContext();
-  const synth = await getSynth();
-  synth.triggerAttack('A4');
+  const instrument = await getInstrument();
+  instrument.triggerAttack('A4');
 }
 
 export async function releaseTuningForkA(): Promise<void> {
-  const synth = await getSynth();
-  synth.triggerRelease('A4');
+  const instrument = await getInstrument();
+  instrument.triggerRelease('A4');
 }

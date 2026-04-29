@@ -1,5 +1,5 @@
 export type Voice = string;
-export type SoundMode = 'piano' | 'sine' | 'organ';
+export type SoundMode = 'grandPiano' | 'choirPad' | 'electricPiano' | 'organ' | 'sine';
 export type VoiceArrangement = 'SATB' | 'TTBB' | 'Unison' | string;
 
 export type Song = {

@@ -175,7 +175,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Sekvens (space-separerte noter, f.eks. "A F A F")
+                  Sekvens (space-separerte noter, f.eks. &quot;A F A F&quot;)
                 </label>
                 <input
                   type="text"

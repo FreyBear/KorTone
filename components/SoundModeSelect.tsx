@@ -17,9 +17,11 @@ export function SoundModeSelect({ value, onChange }: SoundModeSelectProps) {
         className="bg-transparent text-xs font-medium outline-none"
         aria-label="Velg lydtype"
       >
-        <option value="piano">Piano</option>
-        <option value="sine">Sinus</option>
+        <option value="grandPiano">Flygel (Sampler)</option>
+        <option value="choirPad">Kor-pad</option>
+        <option value="electricPiano">Elpiano</option>
         <option value="organ">Orgel</option>
+        <option value="sine">Sinus</option>
       </select>
     </label>
   );

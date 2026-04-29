@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 export default function DebugEnv() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = 
@@ -40,7 +42,7 @@ export default function DebugEnv() {
         </div>
       </div>
       <div className="mt-8 text-sm text-slate-600">
-        Besøk <a href="/" className="underline">/ (home)</a> for å gå tilbake
+        Besøk <Link href="/" className="underline">/ (home)</Link> for å gå tilbake
       </div>
     </div>
   );
