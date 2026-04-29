@@ -97,7 +97,7 @@ function getVoiceOctave(voice?: Voice): number {
 
 function createPolySynth(
   Tone: ToneModule,
-  synthType: typeof Tone.Synth | typeof Tone.AMSynth | typeof Tone.FMSynth,
+  synthType: any,
   options: Record<string, unknown>
 ): PlayableInstrument {
   return new Tone.PolySynth(synthType, options).toDestination() as PlayableInstrument;
