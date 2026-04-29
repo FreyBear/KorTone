@@ -44,6 +44,7 @@ const SAMPLER_URLS: Record<string, string> = {
 let tonePromise: Promise<ToneModule> | null = null;
 let currentSoundMode: SoundMode = 'grandPiano';
 const instrumentPromises: Partial<Record<SoundMode, Promise<PlayableInstrument>>> = {};
+const DEFAULT_SEQUENCE_DURATION = '4n';
 
 export function getSoundMode(): SoundMode {
   return currentSoundMode;
@@ -180,6 +181,44 @@ async function toNote(value: string | undefined, fallbackMidi: number, voice?: V
   return `${letter}${accidental}${octave}`;
 }
 
+function durationToBeats(duration: string): number {
+  const normalized = duration.trim().toLowerCase();
+  const match = normalized.match(/^(\d+)n([t.]?)$/);
+
+  if (!match) {
+    return 1;
+  }
+
+  const noteValue = Number(match[1]);
+  if (!Number.isFinite(noteValue) || noteValue <= 0) {
+    return 1;
+  }
+
+  let beats = 4 / noteValue;
+  if (match[2] === '.') {
+    beats *= 1.5;
+  }
+  if (match[2] === 't') {
+    beats *= 2 / 3;
+  }
+
+  return beats;
+}
+
+function parseSequenceToken(token: string): { noteToken: string; duration: string; isRest: boolean } {
+  const trimmed = token.trim();
+  if (!trimmed) {
+    return { noteToken: '', duration: DEFAULT_SEQUENCE_DURATION, isRest: false };
+  }
+
+  const [rawNoteToken, rawDuration] = trimmed.split(':', 2);
+  const noteToken = rawNoteToken.trim();
+  const duration = rawDuration?.trim() || DEFAULT_SEQUENCE_DURATION;
+  const isRest = /^(r|rest)$/i.test(noteToken);
+
+  return { noteToken, duration, isRest };
+}
+
 export async function primeAudioContext(): Promise<void> {
   const Tone = await getTone();
   if (Tone.getContext().state !== 'running') {
@@ -209,14 +248,20 @@ export async function playSequence(
 ): Promise<void> {
   await primeAudioContext();
 
-  const stepMs = tempoBpm && tempoBpm > 0 ? Math.round((60_000 / tempoBpm) * 0.8) : 520;
+  const quarterMs = tempoBpm && tempoBpm > 0 ? 60_000 / tempoBpm : 500;
   const instrument = await getInstrument();
 
   try {
-    for (const noteName of sequence) {
-      const note = await toNote(noteName, 60);
-      instrument.triggerAttackRelease(note, '8n');
-      await new Promise((resolve) => setTimeout(resolve, stepMs));
+    for (const token of sequence) {
+      const { noteToken, duration, isRest } = parseSequenceToken(token);
+      const waitMs = Math.max(1, Math.round(durationToBeats(duration) * quarterMs));
+
+      if (!isRest) {
+        const note = await toNote(noteToken, 60);
+        instrument.triggerAttackRelease(note, duration);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
     }
   } finally {
     options?.onComplete?.();

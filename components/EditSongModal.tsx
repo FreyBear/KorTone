@@ -175,14 +175,14 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Sekvens (space-separerte noter, f.eks. &quot;A F A F&quot;)
+                  Sekvens (space-separerte noter, f.eks. &quot;C4:2n C4 A4:4n R:4n&quot;)
                 </label>
                 <input
                   type="text"
                   value={formData.sequence}
                   onChange={(e) => setFormData({ ...formData, sequence: e.target.value })}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                  placeholder="C D E F"
+                  placeholder="C4:2n C4 A4:4n R:4n"
                 />
               </div>
 

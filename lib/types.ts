@@ -7,7 +7,7 @@ export type Song = {
   title: string;
   nickname: string | null;
   voices: VoiceArrangement;
-  sequence: string[];  // Array of note names like ["A", "F", "A", "F"]
+  sequence: string[];  // Note tokens like ["C4", "A4:2n", "R:4n"]
   pitches: Record<string, string>;  // Map of voice to pitch
   key_signature: string | null;
   tempo_bpm: number;
