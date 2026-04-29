@@ -182,11 +182,11 @@ export default function Home() {
 
   return (
     <main className="mx-auto min-h-screen max-w-2xl pb-24">
-      <header className="flex items-center justify-between px-4 pt-5">
-        <div>
+      <header className="flex flex-col items-start gap-3 px-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <p className="text-xs uppercase tracking-[0.24em] text-indigo-600">Åsta La Vista</p>
           <h1 className="text-2xl font-bold">Digital stemmegaffel</h1>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          <p className="mt-1 break-words text-xs text-slate-500 dark:text-slate-400">
             {status}
             {' · '}
             {session ? (
@@ -228,7 +228,7 @@ export default function Home() {
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
           {isAdmin && (
             <button
               onClick={() => setAdminPanelOpen(true)}
