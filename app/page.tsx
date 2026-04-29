@@ -27,7 +27,11 @@ function resolveInitialSoundMode(): SoundMode {
     return 'grandPiano';
   }
 
-  if (saved === 'choirPad' || saved === 'electricPiano' || saved === 'sine' || saved === 'organ') {
+  if (saved === 'choirPad' || saved === 'stringsPad') {
+    return 'stringsPad';
+  }
+
+  if (saved === 'electricPiano' || saved === 'sine' || saved === 'organ') {
     return saved;
   }
 

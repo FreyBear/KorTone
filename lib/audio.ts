@@ -118,13 +118,13 @@ async function createInstrument(mode: SoundMode): Promise<PlayableInstrument> {
     return sampler as PlayableInstrument;
   }
 
-  if (mode === 'choirPad') {
+  if (mode === 'stringsPad') {
     return createPolySynth(Tone, Tone.AMSynth, {
-      harmonicity: 1.8,
-      oscillator: { type: 'sine' },
-      envelope: { attack: 0.08, decay: 0.25, sustain: 0.75, release: 1.1 },
-      modulation: { type: 'triangle' },
-      modulationEnvelope: { attack: 0.2, decay: 0.15, sustain: 0.8, release: 1 },
+      harmonicity: 2,
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.12, decay: 0.2, sustain: 0.85, release: 1.4 },
+      modulation: { type: 'sawtooth' },
+      modulationEnvelope: { attack: 0.25, decay: 0.2, sustain: 0.7, release: 1.1 },
     });
   }
 

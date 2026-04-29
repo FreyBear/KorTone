@@ -18,7 +18,7 @@ export function SoundModeSelect({ value, onChange }: SoundModeSelectProps) {
         aria-label="Velg lydtype"
       >
         <option className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="grandPiano">Flygel (Sampler)</option>
-        <option className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="choirPad">Kor-pad</option>
+        <option className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="stringsPad">Stryk-pad</option>
         <option className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="electricPiano">Elpiano</option>
         <option className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="organ">Orgel</option>
         <option className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100" value="sine">Sinus</option>
