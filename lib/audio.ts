@@ -45,7 +45,6 @@ let tonePromise: Promise<ToneModule> | null = null;
 let currentSoundMode: SoundMode = 'grandPiano';
 const instrumentPromises: Partial<Record<SoundMode, Promise<PlayableInstrument>>> = {};
 const DEFAULT_SEQUENCE_DURATION = '4n';
-let metronomeOscillator: any = null;
 let metronomeRunning = false;
 
 export function getSoundMode(): SoundMode {

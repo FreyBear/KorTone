@@ -39,7 +39,6 @@ export default function AuthCallback() {
         console.log('[AUTH CALLBACK] Session check:', { 
           hasSession: !!data?.session, 
           error: error?.message,
-          userEmail: data?.session?.user?.email
         });
 
         if (error) {

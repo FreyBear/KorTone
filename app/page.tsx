@@ -54,41 +54,11 @@ export default function Home() {
     window.localStorage.setItem(soundStorageKey, soundMode);
   }, [soundMode]);
 
-  useEffect(() => {
-    async function loadSongs() {
-      const supabase = getSupabase();
-      
-      if (!hasSupabaseEnv || !supabase) {
-        setStatus('Ingen Supabase-tilkobling. Krever autentisering.');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('songs')
-        .select('id,title,nickname,voices,sequence,pitches,key_signature,tempo_bpm')
-        .order('title', { ascending: true });
-
-      if (error) {
-        setStatus('Kunne ikke hente fra Supabase. Viser demo-data.');
-        return;
-      }
-
-      if (data && data.length > 0) {
-        setSongs(data as Song[]);
-      } else {
-        setStatus('Ingen sanger i databasen enda. Viser demo-data.');
-      }
-    }
-
-    loadSongs();
-  }, []);
-
-  // Reload function that can be called after updating songs
-  async function reloadSongs() {
-    console.log('[reloadSongs] Starting reload...');
+  async function fetchAndSetSongs() {
     const supabase = getSupabase();
-    if (!supabase) {
-      console.error('[reloadSongs] No Supabase client');
+
+    if (!hasSupabaseEnv || !supabase) {
+      setStatus('Ingen Supabase-tilkobling. Krever autentisering.');
       return;
     }
 
@@ -98,17 +68,47 @@ export default function Home() {
       .order('title', { ascending: true });
 
     if (error) {
-      console.error('[reloadSongs] Error fetching songs:', error);
-    } else if (data) {
-      console.log('[reloadSongs] Successfully loaded', data.length, 'songs');
+      setStatus('Kunne ikke hente fra Supabase. Viser demo-data.');
+      return;
+    }
+
+    if (data && data.length > 0) {
       setSongs(data as Song[]);
+    } else {
+      setStatus('Ingen sanger i databasen enda. Viser demo-data.');
+    }
+  }
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void fetchAndSetSongs();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
+
+  const reloadSongs = fetchAndSetSongs;
+
+  async function applyPermissions(supabase: ReturnType<typeof getSupabase>) {
+    if (!supabase) return;
+    const { data: adminCheck } = await supabase.rpc('is_admin');
+    setIsAdmin(adminCheck === true);
+
+    const { data: canEditCheck, error: canEditError } = await supabase.rpc('can_edit_songs');
+    if (canEditError) {
+      console.warn('can_edit_songs() not found, using isAdmin fallback');
+      setCanEdit(adminCheck === true);
+    } else {
+      setCanEdit(canEditCheck === true);
     }
   }
 
   useEffect(() => {
     async function getSession() {
       const supabase = getSupabase();
-      
+
       if (!hasSupabaseEnv || !supabase) {
         return;
       }
@@ -117,42 +117,16 @@ export default function Home() {
       const currentSession = data?.session || null;
       setSession(currentSession);
 
-      // Check user permissions
       if (currentSession) {
-        const { data: adminCheck, error: adminError } = await supabase.rpc('is_admin');
-        setIsAdmin(adminCheck === true);
-        
-        // Try to check can_edit_songs (may not exist yet if SQL not run)
-        const { data: canEditCheck, error: canEditError } = await supabase.rpc('can_edit_songs');
-        if (canEditError) {
-          // Fallback: if function doesn't exist, use isAdmin for editing
-          console.warn('can_edit_songs() not found, using isAdmin fallback');
-          setCanEdit(adminCheck === true);
-        } else {
-          setCanEdit(canEditCheck === true);
-        }
-      } else {
-        setIsAdmin(false);
-        setCanEdit(false);
+        await applyPermissions(supabase);
       }
 
       // Listen for auth changes
       const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
         setSession(session);
-        
-        // Re-check permissions
+
         if (session) {
-          const { data: adminCheck } = await supabase.rpc('is_admin');
-          setIsAdmin(adminCheck === true);
-          
-          // Try to check can_edit_songs (may not exist yet if SQL not run)
-          const { data: canEditCheck, error: canEditError } = await supabase.rpc('can_edit_songs');
-          if (canEditError) {
-            // Fallback: if function doesn't exist, use isAdmin for editing
-            setCanEdit(adminCheck === true);
-          } else {
-            setCanEdit(canEditCheck === true);
-          }
+          await applyPermissions(supabase);
         } else {
           setIsAdmin(false);
           setCanEdit(false);

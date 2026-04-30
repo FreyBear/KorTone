@@ -2,7 +2,20 @@
 
 import Link from 'next/link';
 
+// This page is for development/debugging only.
+// It is blocked in production via the NODE_ENV check below.
 export default function DebugEnv() {
+  const allowed = process.env.NODE_ENV !== 'production';
+
+  if (!allowed) {
+    return (
+      <div className="p-8 max-w-2xl mx-auto">
+        <p className="text-slate-600">Ikke tilgjengelig i produksjon.</p>
+        <Link href="/" className="underline text-indigo-600">Tilbake</Link>
+      </div>
+    );
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = 
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
