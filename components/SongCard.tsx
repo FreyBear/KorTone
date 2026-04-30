@@ -1,8 +1,8 @@
 "use client";
 
-import { Play } from 'lucide-react';
+import { Play, Music } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { playSequence, playVoice } from '@/lib/audio';
+import { playSequence, playVoice, startMetronome, stopMetronome, isMetronomeRunning } from '@/lib/audio';
 import type { Song, Voice } from '@/lib/types';
 import { EditSongModal } from './EditSongModal';
 
@@ -27,6 +27,7 @@ type SongCardProps = {
 export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps) {
   const [activeVoice, setActiveVoice] = useState<Voice | null>(null);
   const [isPlayingSequence, setIsPlayingSequence] = useState(false);
+  const [isMetronomeActive, setIsMetronomeActive] = useState(false);
   const clearVoiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -34,8 +35,11 @@ export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps
       if (clearVoiceTimerRef.current) {
         clearTimeout(clearVoiceTimerRef.current);
       }
+      if (isMetronomeActive) {
+        stopMetronome();
+      }
     };
-  }, []);
+  }, [isMetronomeActive]);
 
   async function handlePlayVoice(voice: Voice): Promise<void> {
     if (isPlayingSequence) {
@@ -67,6 +71,16 @@ export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps
     } finally {
       setIsPlayingSequence(false);
       setActiveVoice(null);
+    }
+  }
+
+  async function handleMetronome(): Promise<void> {
+    if (isMetronomeActive) {
+      stopMetronome();
+      setIsMetronomeActive(false);
+    } else if (song.tempo_bpm && song.tempo_bpm > 0) {
+      await startMetronome(song.tempo_bpm);
+      setIsMetronomeActive(true);
     }
   }
 
@@ -113,6 +127,21 @@ export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps
           <Play size={14} />
           {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
         </button>
+        {song.tempo_bpm && song.tempo_bpm > 0 && (
+          <button
+            type="button"
+            onClick={handleMetronome}
+            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
+              isMetronomeActive
+                ? 'bg-orange-500 text-white hover:bg-orange-600'
+                : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
+            }`}
+            title={`Metronom: ${song.tempo_bpm} BPM`}
+          >
+            <Music size={14} />
+            {isMetronomeActive ? 'Metronom av' : 'Metronom'}
+          </button>
+        )}
       </div>
     </article>
   );

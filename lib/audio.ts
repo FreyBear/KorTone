@@ -45,6 +45,8 @@ let tonePromise: Promise<ToneModule> | null = null;
 let currentSoundMode: SoundMode = 'grandPiano';
 const instrumentPromises: Partial<Record<SoundMode, Promise<PlayableInstrument>>> = {};
 const DEFAULT_SEQUENCE_DURATION = '4n';
+let metronomeOscillator: any = null;
+let metronomeRunning = false;
 
 export function getSoundMode(): SoundMode {
   return currentSoundMode;
@@ -277,4 +279,44 @@ export async function holdTuningForkA(): Promise<void> {
 export async function releaseTuningForkA(): Promise<void> {
   const instrument = await getInstrument();
   instrument.triggerRelease('A4');
+}
+
+export async function startMetronome(tempoBpm: number): Promise<void> {
+  if (metronomeRunning || !tempoBpm || tempoBpm <= 0) {
+    return;
+  }
+
+  await primeAudioContext();
+  metronomeRunning = true;
+
+  const Tone = await getTone();
+  const synth = new Tone.Synth({
+    oscillator: { type: 'square' },
+    envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.05 },
+  }).toDestination();
+
+  const intervalMs = (60_000 / tempoBpm);
+  
+  async function tick() {
+    if (!metronomeRunning) {
+      synth.dispose();
+      return;
+    }
+
+    synth.triggerAttackRelease('C5', '32n');
+    
+    if (metronomeRunning) {
+      setTimeout(tick, intervalMs);
+    }
+  }
+
+  tick();
+}
+
+export function stopMetronome(): void {
+  metronomeRunning = false;
+}
+
+export function isMetronomeRunning(): boolean {
+  return metronomeRunning;
 }
