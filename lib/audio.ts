@@ -88,15 +88,6 @@ function getFallbackMidi(voice: Voice): number {
   return 60;
 }
 
-function getVoiceOctave(voice?: Voice): number {
-  if (!voice) return 4;
-
-  const family = getVoiceFamily(voice);
-  if (family === 'S' || family === 'A') return 4;
-  if (family === 'T' || family === 'BAR' || family === 'B') return 3;
-  return 4;
-}
-
 function createPolySynth(
   Tone: ToneModule,
   synthType: any,
@@ -161,7 +152,7 @@ async function getInstrument(): Promise<PlayableInstrument> {
   return instrumentPromises[mode] as Promise<PlayableInstrument>;
 }
 
-async function toNote(value: string | undefined, fallbackMidi: number, voice?: Voice): Promise<string> {
+async function toNote(value: string | undefined, fallbackMidi: number): Promise<string> {
   const Tone = await getTone();
 
   if (!value || value.trim().length === 0) {
@@ -177,7 +168,8 @@ async function toNote(value: string | undefined, fallbackMidi: number, voice?: V
 
   const letter = match[1] === 'H' ? 'B' : match[1];
   const accidental = match[2] === 'B' ? 'b' : match[2];
-  const octave = match[3] || `${getVoiceOctave(voice)}`;
+  // Keep note entry simple in UI/import: missing octave defaults to octave 4.
+  const octave = match[3] || '4';
 
   return `${letter}${accidental}${octave}`;
 }
@@ -233,7 +225,7 @@ export async function playVoice(
   duration = '8n'
 ): Promise<void> {
   await primeAudioContext();
-  const note = await toNote(pitch, getFallbackMidi(voice), voice);
+  const note = await toNote(pitch, getFallbackMidi(voice));
   const instrument = await getInstrument();
   instrument.triggerAttackRelease(note, duration);
 }

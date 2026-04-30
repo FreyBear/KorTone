@@ -3,13 +3,18 @@
 /**
  * Konverterer CSV til SQL UPSERT-statements for Supabase.
  *
- * Stotter to formater:
- * 1) Ny mal (anbefalt):
+ * Stotter tre formater:
+ * 1) Enkel mal (anbefalt):
+ *    title;nickname;voices;sequence;S;A;T;B;key_signature;tempo_bpm
+ *    - sequence = mellomrom-separert liste, f.eks. C D Eb F R:4n
+ *    - S/A/T/B = starttone per stemme (ingen JSON)
+ *
+ * 2) JSON-mal:
  *    title,nickname,voices,sequence,pitches,key_signature,tempo_bpm
  *    - sequence = JSON-array
  *    - pitches = JSON-objekt
  *
- * 2) Legacy:
+ * 3) Legacy:
  *    title,voices,starttones,key_signature,tempo_bpm
  *
  * Kjor:
@@ -65,6 +70,44 @@ function parseCsvLine(line) {
   return values;
 }
 
+function detectDelimiter(headerLine) {
+  const semicolons = (headerLine.match(/;/g) || []).length;
+  const commas = (headerLine.match(/,/g) || []).length;
+  return semicolons > commas ? ';' : ',';
+}
+
+function parseDelimitedLine(line, delimiter) {
+  if (delimiter === ',') {
+    return parseCsvLine(line);
+  }
+
+  const values = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      const next = line[i + 1];
+      if (inQuotes && next === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === delimiter && !inQuotes) {
+      values.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+
+  values.push(current);
+  return values;
+}
+
 function normalizeHeader(value) {
   return value.trim().toLowerCase();
 }
@@ -87,6 +130,40 @@ function tryParseJson(value, fallback) {
   } catch {
     return fallback;
   }
+}
+
+function parseSimpleSequence(value) {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return [];
+  }
+
+  return raw.split(/\s+/).filter(Boolean);
+}
+
+function parseSimplePitches(row) {
+  const map = [
+    ['s', 'S'], ['s1', 'S1'], ['s2', 'S2'],
+    ['m', 'M'],
+    ['a', 'A'], ['a1', 'A1'], ['a2', 'A2'],
+    ['t', 'T'], ['t1', 'T1'], ['t2', 'T2'],
+    ['b', 'B'], ['b1', 'B1'], ['b2', 'B2'],
+  ];
+
+  const pitches = {};
+  for (const [column, voice] of map) {
+    const raw = row[column];
+    if (raw == null) {
+      continue;
+    }
+
+    const value = String(raw).trim();
+    if (value) {
+      pitches[voice] = value;
+    }
+  }
+
+  return pitches;
 }
 
 function mapLegacyPitches(voices, startTonesArray) {
@@ -131,7 +208,7 @@ function validateSong(song, rowNumber) {
   }
 
   if (!Array.isArray(song.sequence) || song.sequence.length === 0) {
-    errors.push(`[rad ${rowNumber}] sequence maa vaere en ikke-tom JSON-array.`);
+    errors.push(`[rad ${rowNumber}] sequence maa vaere en ikke-tom liste med noter.`);
   } else {
     song.sequence.forEach((token, idx) => {
       if (typeof token !== 'string' || token.trim().length === 0) {
@@ -148,7 +225,7 @@ function validateSong(song, rowNumber) {
   }
 
   if (typeof song.pitches !== 'object' || song.pitches == null || Array.isArray(song.pitches)) {
-    errors.push(`[rad ${rowNumber}] pitches maa vaere et JSON-objekt.`);
+    errors.push(`[rad ${rowNumber}] pitches maa vaere et objekt eller stemmekolonner (S/A/T/B).`);
   } else {
     const pitchEntries = Object.entries(song.pitches);
     if (pitchEntries.length === 0) {
@@ -186,9 +263,11 @@ if (lines.length < 2) {
   process.exit(1);
 }
 
-const headers = parseCsvLine(lines[0]).map(normalizeHeader);
+const delimiter = detectDelimiter(lines[0]);
+const headers = parseDelimitedLine(lines[0], delimiter).map(normalizeHeader);
 
 console.log('📖 Leser CSV med', lines.length - 1, 'sanger...');
+console.log(`🔎 Oppdaget separator: ${delimiter === ';' ? 'semikolon (;)' : 'komma (,)'} `);
 
 // Parse hver sang
 const songs = [];
@@ -197,7 +276,7 @@ const duplicateKeyMap = new Map();
 
 for (let i = 1; i < lines.length; i++) {
   const rowNumber = i + 1;
-  const values = parseCsvLine(lines[i]);
+  const values = parseDelimitedLine(lines[i], delimiter);
   const row = {};
   headers.forEach((header, idx) => {
     row[header] = values[idx] ?? '';
@@ -213,17 +292,39 @@ for (let i = 1; i < lines.length; i++) {
   const keySignature = String(getRowValue(row, ['key_signature', 'keysignature'], '')).trim() || null;
   const tempoBpm = parseTempo(getRowValue(row, ['tempo_bpm', 'tempobpm']));
 
-  let sequence = tryParseJson(getRowValue(row, ['sequence']), null);
-  let pitches = tryParseJson(getRowValue(row, ['pitches']), null);
+  const sequenceRaw = getRowValue(row, ['sequence']);
+  const pitchesRaw = getRowValue(row, ['pitches']);
 
-  // Fallback for legacy format where sequence/pitches are not JSON fields.
-  if (!Array.isArray(sequence) || typeof pitches !== 'object' || pitches == null) {
+  let sequence = tryParseJson(sequenceRaw, null);
+  let pitches = tryParseJson(pitchesRaw, null);
+
+  if (!Array.isArray(sequence)) {
+    sequence = parseSimpleSequence(sequenceRaw);
+  }
+
+  if (typeof pitches !== 'object' || pitches == null || Array.isArray(pitches)) {
+    pitches = parseSimplePitches(row);
+  }
+
+  // Fallback for legacy format where starttones is explicitly present.
+  const hasValidSequence = Array.isArray(sequence) && sequence.length > 0;
+  const hasValidPitches =
+    typeof pitches === 'object' && pitches != null && !Array.isArray(pitches) && Object.keys(pitches).length > 0;
+
+  if (!hasValidSequence || !hasValidPitches) {
     const startToneRaw = String(
       getRowValue(row, ['starttones', 'starttone', 'starttone_raw', 'start_tones'], '')
     ).trim();
-    const startTonesArray = startToneRaw ? startToneRaw.split(/\s+/).filter(Boolean) : [];
-    sequence = startTonesArray;
-    pitches = mapLegacyPitches(voices, startTonesArray);
+
+    if (startToneRaw) {
+      const startTonesArray = startToneRaw.split(/\s+/).filter(Boolean);
+      if (!hasValidSequence) {
+        sequence = startTonesArray;
+      }
+      if (!hasValidPitches) {
+        pitches = mapLegacyPitches(voices, startTonesArray);
+      }
+    }
   }
 
   const song = {

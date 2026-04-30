@@ -14,7 +14,7 @@ type EditSongModalProps = {
 
 // Helper: Sort pitches in musical order (S, A, T, B)
 function sortPitches(pitches: Partial<Record<Voice, string>>): string {
-  const voiceOrder: Voice[] = ['S', 'A', 'T', 'B'];
+  const voiceOrder: Voice[] = ['S', 'M', 'A', 'T', 'B'];
   const sorted: Partial<Record<Voice, string>> = {};
   
   voiceOrder.forEach(voice => {

@@ -6,7 +6,7 @@ import { playSequence, playVoice, startMetronome, stopMetronome, isMetronomeRunn
 import type { Song, Voice } from '@/lib/types';
 import { EditSongModal } from './EditSongModal';
 
-const VOICE_ORDER = ['S1', 'S2', 'S', 'A1', 'A2', 'A', 'T1', 'T2', 'T', 'Bar', 'B1', 'B2', 'B'];
+const VOICE_ORDER = ['S1', 'S2', 'S', 'M1', 'M2', 'M', 'A1', 'A2', 'A', 'T1', 'T2', 'T', 'Bar', 'B1', 'B2', 'B'];
 function sortVoices(voices: string[]): string[] {
   return [...voices].sort((a, b) => {
     const ai = VOICE_ORDER.indexOf(a);

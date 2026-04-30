@@ -64,12 +64,22 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-function escapeCsv(value) {
+function escapeDelimited(value, delimiter = ';') {
   const text = value == null ? '' : String(value);
-  if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+  if (text.includes(delimiter) || text.includes('"') || text.includes('\n')) {
     return `"${text.replace(/"/g, '""')}"`;
   }
   return text;
+}
+
+function pickPitch(pitches, keys) {
+  for (const key of keys) {
+    const value = pitches?.[key];
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return '';
 }
 
 async function run() {
@@ -83,21 +93,28 @@ async function run() {
     process.exit(1);
   }
 
-  const header = ['title', 'nickname', 'voices', 'sequence', 'pitches', 'key_signature', 'tempo_bpm'];
-  const lines = [header.join(',')];
+  const delimiter = ';';
+  const header = ['title', 'nickname', 'voices', 'sequence', 'S', 'A', 'T', 'B', 'key_signature', 'tempo_bpm'];
+  const lines = [header.join(delimiter)];
 
   for (const song of data || []) {
+    const sequenceText = Array.isArray(song.sequence) ? song.sequence.join(' ') : '';
+    const pitches = song.pitches || {};
+
     const row = [
       song.title,
       song.nickname || '',
       song.voices,
-      JSON.stringify(song.sequence || []),
-      JSON.stringify(song.pitches || {}),
+      sequenceText,
+      pickPitch(pitches, ['S', 'S1', 'S2']),
+      pickPitch(pitches, ['A', 'A1', 'A2']),
+      pickPitch(pitches, ['T', 'T1', 'T2']),
+      pickPitch(pitches, ['B', 'B1', 'B2', 'Bar']),
       song.key_signature || '',
       song.tempo_bpm ?? 120,
     ];
 
-    lines.push(row.map(escapeCsv).join(','));
+    lines.push(row.map((value) => escapeDelimited(value, delimiter)).join(delimiter));
   }
 
   fs.writeFileSync(outputPath, `${lines.join('\n')}\n`, 'utf-8');

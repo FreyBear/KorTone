@@ -9,12 +9,15 @@ Kjor:
 Output:
 - `data/songs.import-template.csv`
 
-CSV-malen inneholder kolonnene:
+CSV-malen inneholder kolonnene (semikolon-separert):
 - `title`
 - `nickname`
 - `voices`
-- `sequence` (JSON-array)
-- `pitches` (JSON-objekt)
+- `sequence` (mellomrom-separert, f.eks. `C D Eb F` eller `C4:2n D4:4n R:4n`)
+- `S`
+- `A`
+- `T`
+- `B`
 - `key_signature`
 - `tempo_bpm`
 
@@ -37,10 +40,27 @@ For SQL genereres valideres CSV automatisk. Import avbrytes hvis noe er feil.
 
 Validering inkluderer:
 - `title` og `voices` maa vaere satt
-- `sequence` maa vaere ikke-tom array med gyldige tokens (f.eks. `C4:2n`, `Eb:4n`, `R:4n`)
-- `pitches` maa vaere ikke-tomt JSON-objekt med gyldige noter
+- `sequence` maa vaere ikke-tom liste med gyldige tokens (f.eks. `C4:2n`, `Eb:4n`, `R:4n`)
+- minst en stemme maa ha starttone (`S/A/T/B` eller `pitches`)
 - `tempo_bpm` maa vaere positivt heltall
 - duplikater i samme CSV paa `title + voices` stoppes
+
+Notat om notenavn:
+- Hvis oktav mangler i `sequence` eller `pitches` (f.eks. `C`, `Bb`, `F#`), tolkes den som oktav 4 (`C4`, `Bb4`, `F#4`).
+
+## Enkelt format (anbefalt)
+Du kan skrive importfil uten JSON ved aa bruke semikolon `;`:
+
+`title;nickname;voices;sequence;S;A;T;B;key_signature;tempo_bpm`
+
+Eksempel:
+
+`Vackra Kvarten;;TTBB;D Bb F Bb;;;D;Bb;Bb-dur;80`
+
+Tips:
+- Tomme stemmer lar du bare sta tomme mellom semikolon.
+- For `TTBB` bruker du normalt bare `T` og `B`.
+- Importscriptet stotter fortsatt gammel JSON-mal og legacy `starttones`.
 
 ## Stottet startformat
 - JSON (anbefalt)
