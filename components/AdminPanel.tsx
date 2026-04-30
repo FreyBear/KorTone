@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Users, Shield, Edit3, X } from 'lucide-react';
 import { getSupabase } from '@/lib/supabase';
+import { Toast } from '@/components/Toast';
 
 type UserWithRole = {
   user_id: string;
@@ -21,6 +22,13 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
+
+  function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
+    setToastMessage(message);
+    setToastType(type);
+  }
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -78,8 +86,9 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .eq('user_id', userId);
 
         if (error) {
-          alert(`Kunne ikke fjerne rolle: ${error.message}`);
+          showToast(`Kunne ikke fjerne rolle: ${error.message}`, 'error');
         } else {
+          showToast('Rolle fjernet', 'success');
           await loadUsers();
         }
       } else {
@@ -89,14 +98,15 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
 
         if (error) {
-          alert(`Kunne ikke sette rolle: ${error.message}`);
+          showToast(`Kunne ikke sette rolle: ${error.message}`, 'error');
         } else {
+          showToast('Rolle oppdatert', 'success');
           await loadUsers();
         }
       }
     } catch (err) {
       console.error('Error setting role:', err);
-      alert('En uventet feil oppstod');
+      showToast('En uventet feil oppstod', 'error');
     }
   }
 
@@ -104,6 +114,13 @@ export function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
       <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">

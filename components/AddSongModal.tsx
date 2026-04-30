@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, Save, X } from 'lucide-react';
 import { getSupabase } from '@/lib/supabase';
+import { Toast } from '@/components/Toast';
 
 type AddSongModalProps = {
   canEdit: boolean;
@@ -33,6 +34,13 @@ export function AddSongModal({ canEdit, onSongAdded }: AddSongModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<SongFormData>(defaultFormData);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
+
+  function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
+    setToastMessage(message);
+    setToastType(type);
+  }
 
   if (!canEdit) return null;
 
@@ -42,8 +50,11 @@ export function AddSongModal({ canEdit, onSongAdded }: AddSongModalProps) {
   }
 
   async function handleSave() {
-    if (!formData.title.trim()) {
-      alert('Tittel er påkrevd');
+    const normalizedTitle = formData.title.trim();
+    const normalizedVoices = formData.voices.trim() || 'SATB';
+
+    if (!normalizedTitle) {
+      showToast('Tittel er paakrevd', 'error');
       return;
     }
 
@@ -52,7 +63,26 @@ export function AddSongModal({ canEdit, onSongAdded }: AddSongModalProps) {
     try {
       const supabase = getSupabase();
       if (!supabase) {
-        alert('Ingen Supabase-tilkobling');
+        showToast('Ingen Supabase-tilkobling', 'error');
+        setIsSaving(false);
+        return;
+      }
+
+      const { data: duplicateSong, error: duplicateCheckError } = await supabase
+        .from('songs')
+        .select('id')
+        .ilike('title', normalizedTitle)
+        .eq('voices', normalizedVoices)
+        .maybeSingle();
+
+      if (duplicateCheckError && duplicateCheckError.code !== 'PGRST116') {
+        showToast(`Kunne ikke sjekke duplikat: ${duplicateCheckError.message}`, 'error');
+        setIsSaving(false);
+        return;
+      }
+
+      if (duplicateSong) {
+        showToast('En sang med samme tittel og stemmesett finnes allerede', 'error');
         setIsSaving(false);
         return;
       }
@@ -63,15 +93,15 @@ export function AddSongModal({ canEdit, onSongAdded }: AddSongModalProps) {
       try {
         pitchesObj = JSON.parse(formData.pitches);
       } catch {
-        alert('Ugyldig JSON i pitches-feltet');
+        showToast('Ugyldig JSON i pitches-feltet', 'error');
         setIsSaving(false);
         return;
       }
 
       const { error } = await supabase.from('songs').insert({
-        title: formData.title.trim(),
+        title: normalizedTitle,
         nickname: formData.nickname.trim() || null,
-        voices: formData.voices.trim() || 'SATB',
+        voices: normalizedVoices,
         sequence: sequenceArray,
         pitches: pitchesObj,
         key_signature: formData.key_signature.trim() || null,
@@ -79,23 +109,31 @@ export function AddSongModal({ canEdit, onSongAdded }: AddSongModalProps) {
       });
 
       if (error) {
-        alert(`Kunne ikke opprette sang: ${error.message}`);
+        showToast(`Kunne ikke opprette sang: ${error.message}`, 'error');
         setIsSaving(false);
         return;
       }
 
+      showToast('Sang opprettet', 'success');
       setIsSaving(false);
       setIsOpen(false);
       await onSongAdded();
     } catch (err) {
       console.error('Unexpected error while adding song:', err);
-      alert('En uventet feil oppstod. Se konsollen for detaljer.');
+      showToast('En uventet feil oppstod. Se konsollen for detaljer.', 'error');
       setIsSaving(false);
     }
   }
 
   return (
     <>
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
       <button
         type="button"
         onClick={handleOpen}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
 import type { Song, Voice } from '@/lib/types';
 import { getSupabase } from '@/lib/supabase';
+import { Toast } from '@/components/Toast';
 
 type EditSongModalProps = {
   song: Song;
@@ -28,6 +29,8 @@ function sortPitches(pitches: Partial<Record<Voice, string>>): string {
 export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
   const [formData, setFormData] = useState({
     title: song.title,
     nickname: song.nickname || '',
@@ -39,6 +42,11 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
   });
 
   if (!isAdmin) return null;
+
+  function showToast(message: string, type: 'success' | 'error' | 'info' = 'info') {
+    setToastMessage(message);
+    setToastType(type);
+  }
 
   function handleOpen() {
     // Reset form data to current song values when opening
@@ -59,7 +67,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     try {
       const supabase = getSupabase();
       if (!supabase) {
-        alert('Ingen Supabase-tilkobling');
+        showToast('Ingen Supabase-tilkobling', 'error');
         setIsSaving(false);
         return;
       }
@@ -72,7 +80,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
       try {
         pitchesObj = JSON.parse(formData.pitches);
       } catch (e) {
-        alert('Ugyldig JSON i pitches-feltet');
+        showToast('Ugyldig JSON i pitches-feltet', 'error');
         setIsSaving(false);
         return;
       }
@@ -92,24 +100,32 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
       if (error) {
         console.error('Feil ved oppdatering:', error);
-        alert(`❌ Kunne ikke lagre: ${error.message}`);
+        showToast(`Kunne ikke lagre: ${error.message}`, 'error');
         setIsSaving(false);
       } else {
         // Success!
         console.log('✅ Song updated successfully');
+        showToast('Sang oppdatert', 'success');
         setIsSaving(false);
         setIsOpen(false);
         await onSongUpdated();
       }
     } catch (err) {
       console.error('Unexpected error:', err);
-      alert('En uventet feil oppstod. Se konsollen for detaljer.');
+      showToast('En uventet feil oppstod. Se konsollen for detaljer.', 'error');
       setIsSaving(false);
     }
   }
 
   return (
     <>
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type={toastType}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
       <button
         type="button"
         onClick={handleOpen}
