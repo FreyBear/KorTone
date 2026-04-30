@@ -42,7 +42,7 @@ function resolveInitialSoundMode(): SoundMode {
 export default function Home() {
   const [songs, setSongs] = useState<Song[]>(fallbackSongs);
   const [query, setQuery] = useState('');
-  const [status, setStatus] = useState('Demo-data aktiv. [Deploy test 30/4 09:00]');
+  const [status, setStatus] = useState('Demo-data aktiv.');
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
