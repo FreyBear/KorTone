@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Konverterer CSV til SQL INSERT-statements for Supabase.
+ * Konverterer CSV til SQL UPSERT-statements for Supabase.
  *
  * Stotter to formater:
  * 1) Ny mal (anbefalt):
@@ -15,6 +15,10 @@
  * Kjor:
  *   node scripts/import-csv-to-supabase.js
  *   node scripts/import-csv-to-supabase.js data/songs.import-template.csv
+ *
+ * Viktig:
+ *   For UPSERT kreves unik constraint paa (title, voices).
+ *   Kjor supabase/add-songs-upsert-constraint.sql en gang i databasen.
  */
 
 import fs from 'fs';
@@ -29,6 +33,9 @@ const csvPath = inputArg
   ? path.resolve(process.cwd(), inputArg)
   : path.join(__dirname, '..', 'sanger.csv');
 const outputPath = path.join(__dirname, '..', 'supabase', 'import-songs.sql');
+
+const DURATION_PATTERN = '(?:1|2|4|8|16|32)n(?:[t.]?)';
+const NOTE_PATTERN = new RegExp(`^(?:[A-GH](?:#|b)?\\d?|R|REST)(?::${DURATION_PATTERN})?$`, 'i');
 
 function parseCsvLine(line) {
   const values = [];
@@ -112,6 +119,61 @@ function getRowValue(row, keys, fallback = '') {
   return fallback;
 }
 
+function validateSong(song, rowNumber) {
+  const errors = [];
+
+  if (!song.title || song.title.trim().length === 0) {
+    errors.push(`[rad ${rowNumber}] title mangler.`);
+  }
+
+  if (!song.voices || song.voices.trim().length === 0) {
+    errors.push(`[rad ${rowNumber}] voices mangler.`);
+  }
+
+  if (!Array.isArray(song.sequence) || song.sequence.length === 0) {
+    errors.push(`[rad ${rowNumber}] sequence maa vaere en ikke-tom JSON-array.`);
+  } else {
+    song.sequence.forEach((token, idx) => {
+      if (typeof token !== 'string' || token.trim().length === 0) {
+        errors.push(`[rad ${rowNumber}] sequence[${idx}] maa vaere tekst.`);
+        return;
+      }
+
+      if (!NOTE_PATTERN.test(token.trim())) {
+        errors.push(
+          `[rad ${rowNumber}] sequence[${idx}] har ugyldig format: "${token}" (eksempel: C4:2n, Eb:4n, R:4n).`
+        );
+      }
+    });
+  }
+
+  if (typeof song.pitches !== 'object' || song.pitches == null || Array.isArray(song.pitches)) {
+    errors.push(`[rad ${rowNumber}] pitches maa vaere et JSON-objekt.`);
+  } else {
+    const pitchEntries = Object.entries(song.pitches);
+    if (pitchEntries.length === 0) {
+      errors.push(`[rad ${rowNumber}] pitches kan ikke vaere tomt.`);
+    }
+
+    for (const [voice, pitch] of pitchEntries) {
+      if (!voice || voice.trim().length === 0) {
+        errors.push(`[rad ${rowNumber}] pitches har tom stemme-noekkel.`);
+      }
+      if (typeof pitch !== 'string' || pitch.trim().length === 0) {
+        errors.push(`[rad ${rowNumber}] pitches[${voice}] maa vaere tekst.`);
+      } else if (!NOTE_PATTERN.test(pitch.trim())) {
+        errors.push(`[rad ${rowNumber}] pitches[${voice}] har ugyldig noteformat: "${pitch}".`);
+      }
+    }
+  }
+
+  if (!Number.isInteger(song.tempoBpm) || song.tempoBpm <= 0) {
+    errors.push(`[rad ${rowNumber}] tempo_bpm maa vaere et positivt heltall.`);
+  }
+
+  return errors;
+}
+
 // Les CSV
 const csvContent = fs.readFileSync(csvPath, 'utf-8');
 const lines = csvContent
@@ -130,7 +192,11 @@ console.log('📖 Leser CSV med', lines.length - 1, 'sanger...');
 
 // Parse hver sang
 const songs = [];
+const validationErrors = [];
+const duplicateKeyMap = new Map();
+
 for (let i = 1; i < lines.length; i++) {
+  const rowNumber = i + 1;
   const values = parseCsvLine(lines[i]);
   const row = {};
   headers.forEach((header, idx) => {
@@ -138,7 +204,9 @@ for (let i = 1; i < lines.length; i++) {
   });
 
   const title = String(getRowValue(row, ['title'])).trim();
-  if (!title) continue;
+  if (!title) {
+    continue;
+  }
 
   const voices = String(getRowValue(row, ['voices'], 'SATB')).trim() || 'SATB';
   const nickname = String(getRowValue(row, ['nickname'], '')).trim() || null;
@@ -158,7 +226,7 @@ for (let i = 1; i < lines.length; i++) {
     pitches = mapLegacyPitches(voices, startTonesArray);
   }
 
-  songs.push({
+  const song = {
     title,
     nickname,
     voices,
@@ -166,24 +234,49 @@ for (let i = 1; i < lines.length; i++) {
     pitches,
     keySignature,
     tempoBpm,
-  });
+  };
+
+  const key = `${title.toLowerCase()}|${voices.toLowerCase()}`;
+  if (duplicateKeyMap.has(key)) {
+    validationErrors.push(
+      `[rad ${rowNumber}] duplikat i filen for title+voices: "${title}" + "${voices}" (foerst sett paa rad ${duplicateKeyMap.get(key)}).`
+    );
+  } else {
+    duplicateKeyMap.set(key, rowNumber);
+  }
+
+  validationErrors.push(...validateSong(song, rowNumber));
+  songs.push(song);
 }
 
-console.log('✅ Parsed', songs.length, 'sanger');
+if (songs.length === 0) {
+  console.error('Ingen gyldige sangrader funnet i CSV.');
+  process.exit(1);
+}
 
-// Generer SQL
-let sql = `-- Auto-generert import av sanger fra CSV
+if (validationErrors.length > 0) {
+  console.error('\n❌ Validering feilet. Import avbrutt.');
+  validationErrors.forEach((error) => console.error(`- ${error}`));
+  process.exit(1);
+}
+
+console.log('✅ Validering OK for', songs.length, 'sanger');
+
+// Generer SQL (UPSERT)
+let sql = `-- Auto-generert UPSERT av sanger fra CSV
 -- Generert: ${new Date().toISOString()}
+-- Krever unik constraint paa (title, voices):
+-- Kjor en gang: supabase/add-songs-upsert-constraint.sql
 
 `;
 
-songs.forEach((song, idx) => {
+songs.forEach((song) => {
   const pitchesJson = JSON.stringify(song.pitches).replace(/'/g, "''");
   const sequenceArray = song.sequence.map((n) => `'${escapeSql(n)}'`).join(',');
   const nicknameSql = song.nickname ? `'${escapeSql(song.nickname)}'` : 'NULL';
   const keySignatureSql = song.keySignature ? `'${escapeSql(song.keySignature)}'` : 'NULL';
-  
-sql += `INSERT INTO public.songs (title, nickname, voices, sequence, pitches, key_signature, tempo_bpm)
+
+  sql += `INSERT INTO public.songs (title, nickname, voices, sequence, pitches, key_signature, tempo_bpm)
 VALUES (
   '${escapeSql(song.title)}',
   ${nicknameSql},
@@ -192,13 +285,21 @@ VALUES (
   '${pitchesJson}'::jsonb,
   ${keySignatureSql},
   ${song.tempoBpm}
-);\n\n`;
+)
+ON CONFLICT (title, voices) DO UPDATE
+SET
+  nickname = EXCLUDED.nickname,
+  sequence = EXCLUDED.sequence,
+  pitches = EXCLUDED.pitches,
+  key_signature = EXCLUDED.key_signature,
+  tempo_bpm = EXCLUDED.tempo_bpm,
+  updated_at = now();\n\n`;
 });
 
 // Skriv til fil
 fs.writeFileSync(outputPath, sql);
 console.log('💾 SQL generert:', outputPath);
 console.log('\n📋 Neste steg:');
-console.log('1. Åpne Supabase SQL Editor');
-console.log('2. Kjør først: supabase/migrate-to-new-structure.sql');
-console.log('3. Kjør deretter: supabase/import-songs.sql');
+console.log('1. Kjor en gang i Supabase: supabase/add-songs-upsert-constraint.sql');
+console.log('2. Aapne Supabase SQL Editor');
+console.log('3. Kjor: supabase/import-songs.sql');

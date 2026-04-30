@@ -21,6 +21,27 @@ CSV-malen inneholder kolonnene:
 Deretter kan du redigere fila og importere tilbake via:
 - `node scripts/import-csv-to-supabase.js data/songs.import-template.csv`
 
+## Oppdatering vs nye rader (UPSERT)
+Importscriptet bruker na UPSERT i stedet for bare INSERT:
+- Hvis `title + voices` finnes fra for, blir raden oppdatert.
+- Hvis kombinasjonen ikke finnes, blir ny sang opprettet.
+
+For at dette skal fungere maa databasen ha unik constraint paa `title + voices`.
+Kjor denne en gang i Supabase:
+- `supabase/add-songs-upsert-constraint.sql`
+
+Merk: hvis databasen allerede har duplikater paa `title + voices`, vil constraint-scriptet stoppe med feil. Da maa du rydde duplikatene forst.
+
+## Validering for import
+For SQL genereres valideres CSV automatisk. Import avbrytes hvis noe er feil.
+
+Validering inkluderer:
+- `title` og `voices` maa vaere satt
+- `sequence` maa vaere ikke-tom array med gyldige tokens (f.eks. `C4:2n`, `Eb:4n`, `R:4n`)
+- `pitches` maa vaere ikke-tomt JSON-objekt med gyldige noter
+- `tempo_bpm` maa vaere positivt heltall
+- duplikater i samme CSV paa `title + voices` stoppes
+
 ## Stottet startformat
 - JSON (anbefalt)
 - CSV (kan konverteres til JSON for enklere validering)
