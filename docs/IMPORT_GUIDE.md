@@ -1,5 +1,26 @@
 # Import av sangdata
 
+## Eksporter dagens database til CSV-mal
+Ja, dette er mulig og anbefalt nar du vil bulk-importere med samme struktur som appen bruker.
+
+Kjor:
+- `node scripts/export-songs-template.js`
+
+Output:
+- `data/songs.import-template.csv`
+
+CSV-malen inneholder kolonnene:
+- `title`
+- `nickname`
+- `voices`
+- `sequence` (JSON-array)
+- `pitches` (JSON-objekt)
+- `key_signature`
+- `tempo_bpm`
+
+Deretter kan du redigere fila og importere tilbake via:
+- `node scripts/import-csv-to-supabase.js data/songs.import-template.csv`
+
 ## Stottet startformat
 - JSON (anbefalt)
 - CSV (kan konverteres til JSON for enklere validering)
