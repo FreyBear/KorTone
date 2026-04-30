@@ -19,11 +19,37 @@ function TuningForkIcon() {
       height="24"
     >
       <path
-        d="M8 3V9M16 3V9M8 3H16M8 9C8 11.8 9.7 13.8 12 14.6V19.2M16 9C16 11.8 14.3 13.8 12 14.6M12 19.2V21M10.5 21H13.5"
+        d="M8 3V11C8 13.21 9.79 15 12 15C14.21 15 16 13.21 16 11V3"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+      <path
+        d="M12 15V21"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M10.5 21H13.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6.2 5.2V9.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.7"
+      />
+      <path
+        d="M17.8 5.2V9.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.7"
       />
     </svg>
   );
