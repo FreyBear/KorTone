@@ -75,7 +75,6 @@ export default function Home() {
 
       if (data && data.length > 0) {
         setSongs(data as Song[]);
-        setStatus('Koblet til Supabase.');
       } else {
         setStatus('Ingen sanger i databasen enda. Viser demo-data.');
       }
