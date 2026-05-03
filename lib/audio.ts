@@ -334,3 +334,19 @@ export function stopMetronome(): void {
 export function isMetronomeRunning(): boolean {
   return metronomeRunning;
 }
+
+export function isIOS(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return /iphone|ipad|ipod/.test(ua);
+}
+
+export async function detectIOSSilentMode(): Promise<boolean> {
+  if (!isIOS()) return false;
+  ensureBrowser();
+
+  const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+  const isSilent = audioContext.state === 'suspended';
+  audioContext.close();
+  return isSilent;
+}

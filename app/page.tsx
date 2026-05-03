@@ -11,10 +11,11 @@ import { TuningForkFab } from '@/components/TuningForkFab';
 import { AdminPanel } from '@/components/AdminPanel';
 import { Shield } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
-import { installAudioWarmupOnFirstGesture, preloadCurrentInstrument, setSoundMode } from '@/lib/audio';
+import { installAudioWarmupOnFirstGesture, preloadCurrentInstrument, setSoundMode, detectIOSSilentMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
 import { hasSupabaseEnv, getSupabase } from '@/lib/supabase';
 import type { Song, SoundMode } from '@/lib/types';
+import { Toast } from '@/components/Toast';
 
 const soundStorageKey = 'kortone-sound-mode';
 
@@ -48,6 +49,7 @@ export default function Home() {
   const [canEdit, setCanEdit] = useState(false);
   const [adminPanelOpen, setAdminPanelOpen] = useState(false);
   const [soundMode, setSoundModeState] = useState<SoundMode>(resolveInitialSoundMode);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setSoundMode(soundMode);
