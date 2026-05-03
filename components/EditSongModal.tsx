@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
 import { PianoIcon, PianoSheet } from '@/components/PianoSheet';
 import type { Song, Voice } from '@/lib/types';
@@ -31,6 +31,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSequencePianoOpen, setIsSequencePianoOpen] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<'8n' | '4n' | '2n' | '1n'>('4n');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
   const [formData, setFormData] = useState({
@@ -42,7 +43,6 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     tempo_bpm: song.tempo_bpm,
     pitches: sortPitches(song.pitches),
   });
-  const sequenceInteractionIndexRef = useRef<Map<number, number>>(new Map());
 
   if (!isAdmin) return null;
 
@@ -62,13 +62,12 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
       tempo_bpm: song.tempo_bpm,
       pitches: sortPitches(song.pitches),
     });
-    sequenceInteractionIndexRef.current.clear();
+    setSelectedDuration('4n');
     setIsSequencePianoOpen(false);
     setIsOpen(true);
   }
 
   function closeModal() {
-    sequenceInteractionIndexRef.current.clear();
     setIsSequencePianoOpen(false);
     setIsOpen(false);
   }
@@ -83,56 +82,13 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
   function removeLastSequenceToken() {
     setFormData((current) => {
       const tokens = current.sequence.trim().split(/\s+/).filter((token) => token.length > 0);
-      const removedIndex = tokens.length - 1;
       tokens.pop();
 
-      if (removedIndex >= 0) {
-        sequenceInteractionIndexRef.current.forEach((index, interactionId) => {
-          if (index === removedIndex) {
-            sequenceInteractionIndexRef.current.delete(interactionId);
-          }
-        });
-      }
-
       return {
         ...current,
         sequence: tokens.join(' '),
       };
     });
-  }
-
-  function handleDurationNoteInput(payload: {
-    interactionId: number;
-    note: string;
-    duration: '4n' | '2n' | '1n';
-    isUpdate: boolean;
-  }) {
-    const tokenValue = `${payload.note}:${payload.duration}`;
-
-    setFormData((current) => {
-      const tokens = current.sequence.trim().split(/\s+/).filter((token) => token.length > 0);
-
-      if (!payload.isUpdate) {
-        const newIndex = tokens.length;
-        tokens.push(tokenValue);
-        sequenceInteractionIndexRef.current.set(payload.interactionId, newIndex);
-      } else {
-        const targetIndex = sequenceInteractionIndexRef.current.get(payload.interactionId);
-        if (targetIndex === undefined || targetIndex < 0 || targetIndex >= tokens.length) {
-          return current;
-        }
-        tokens[targetIndex] = tokenValue;
-      }
-
-      return {
-        ...current,
-        sequence: tokens.join(' '),
-      };
-    });
-  }
-
-  function handleDurationNoteEnd(interactionId: number) {
-    sequenceInteractionIndexRef.current.delete(interactionId);
   }
 
   async function handleSave() {
@@ -354,10 +310,12 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
         isOpen={isSequencePianoOpen}
         onClose={() => setIsSequencePianoOpen(false)}
         title="Sekvensinput"
-        onNoteDurationInput={handleDurationNoteInput}
-        onNoteDurationEnd={handleDurationNoteEnd}
+        durationOptions={['8n', '4n', '2n', '1n']}
+        selectedDuration={selectedDuration}
+        onSelectDuration={setSelectedDuration}
+        onNoteInput={(note) => appendSequenceToken(`${note}:${selectedDuration}`)}
         onBackspace={removeLastSequenceToken}
-        onPauseInput={() => appendSequenceToken('R:4n')}
+        onPauseInput={() => appendSequenceToken(`R:${selectedDuration}`)}
         zIndexClassName="z-[60]"
       />
     </>

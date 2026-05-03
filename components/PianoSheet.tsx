@@ -80,13 +80,9 @@ type PianoSheetProps = {
   onActivated?: () => void;
   title?: string;
   onNoteInput?: (noteToken: string) => void;
-  onNoteDurationInput?: (payload: {
-    interactionId: number;
-    note: string;
-    duration: '4n' | '2n' | '1n';
-    isUpdate: boolean;
-  }) => void;
-  onNoteDurationEnd?: (interactionId: number) => void;
+  durationOptions?: Array<'8n' | '4n' | '2n' | '1n'>;
+  selectedDuration?: '8n' | '4n' | '2n' | '1n';
+  onSelectDuration?: (duration: '8n' | '4n' | '2n' | '1n') => void;
   onBackspace?: () => void;
   onPauseInput?: () => void;
   zIndexClassName?: string;
@@ -98,8 +94,9 @@ export function PianoSheet({
   onActivated,
   title = `Piano — C${START_OCTAVE}–H${END_OCTAVE} (C5 i midten)`,
   onNoteInput,
-  onNoteDurationInput,
-  onNoteDurationEnd,
+  durationOptions,
+  selectedDuration,
+  onSelectDuration,
   onBackspace,
   onPauseInput,
   zIndexClassName = 'z-40',
@@ -109,33 +106,10 @@ export function PianoSheet({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number | null>(null);
   const dragOffsetY = useRef(0);
-  const interactionCounterRef = useRef(0);
-  const noteInteractionRef = useRef<Map<string, number>>(new Map());
-  const noteTimersRef = useRef<Map<string, { half: number; whole: number }>>(new Map());
-
-  function clearNoteTimers(note: string) {
-    const timers = noteTimersRef.current.get(note);
-    if (!timers) {
-      return;
-    }
-    window.clearTimeout(timers.half);
-    window.clearTimeout(timers.whole);
-    noteTimersRef.current.delete(note);
-  }
-
-  function resetInteractionState() {
-    noteTimersRef.current.forEach((timers) => {
-      window.clearTimeout(timers.half);
-      window.clearTimeout(timers.whole);
-    });
-    noteTimersRef.current.clear();
-    noteInteractionRef.current.clear();
-  }
 
   useEffect(() => {
     if (!isOpen) {
       setActiveNotes(new Set());
-      resetInteractionState();
       return;
     }
 
@@ -166,7 +140,6 @@ export function PianoSheet({
 
   function handleClose() {
     setActiveNotes(new Set());
-    resetInteractionState();
     if (panelRef.current) {
       panelRef.current.style.transform = '';
     }
@@ -181,47 +154,7 @@ export function PianoSheet({
     stopAllPlayback();
     onActivated?.();
     await holdNote(note);
-
-    if (onNoteDurationInput) {
-      interactionCounterRef.current += 1;
-      const interactionId = interactionCounterRef.current;
-      noteInteractionRef.current.set(note, interactionId);
-
-      onNoteDurationInput({
-        interactionId,
-        note,
-        duration: '4n',
-        isUpdate: false,
-      });
-
-      const halfTimer = window.setTimeout(() => {
-        if (noteInteractionRef.current.get(note) !== interactionId) {
-          return;
-        }
-        onNoteDurationInput({
-          interactionId,
-          note,
-          duration: '2n',
-          isUpdate: true,
-        });
-      }, 350);
-
-      const wholeTimer = window.setTimeout(() => {
-        if (noteInteractionRef.current.get(note) !== interactionId) {
-          return;
-        }
-        onNoteDurationInput({
-          interactionId,
-          note,
-          duration: '1n',
-          isUpdate: true,
-        });
-      }, 900);
-
-      noteTimersRef.current.set(note, { half: halfTimer, whole: wholeTimer });
-    } else {
-      onNoteInput?.(note);
-    }
+    onNoteInput?.(note);
 
     setActiveNotes((prev) => new Set(prev).add(note));
   }
@@ -232,13 +165,6 @@ export function PianoSheet({
     }
 
     await releaseNote(note);
-    clearNoteTimers(note);
-
-    const interactionId = noteInteractionRef.current.get(note);
-    if (interactionId !== undefined) {
-      onNoteDurationEnd?.(interactionId);
-      noteInteractionRef.current.delete(note);
-    }
 
     setActiveNotes((prev) => {
       const next = new Set(prev);
@@ -338,40 +264,62 @@ export function PianoSheet({
           <div className="h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-4 pb-2">
-          <span className="select-none text-sm font-medium text-slate-500 dark:text-slate-400">
-            {title}
-          </span>
-          <div className="flex items-center gap-2">
-            {onPauseInput && (
+        <div className="space-y-2 px-4 pb-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="select-none text-sm font-medium text-slate-500 dark:text-slate-400">
+              {title}
+            </span>
+            <div className="flex items-center gap-2">
+              {onPauseInput && (
+                <button
+                  type="button"
+                  onClick={onPauseInput}
+                  className="inline-flex h-8 items-center gap-1 rounded-full border border-slate-200 px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <Pause size={14} />
+                  Pause
+                </button>
+              )}
+              {onBackspace && (
+                <button
+                  type="button"
+                  onClick={onBackspace}
+                  className="inline-flex h-8 items-center gap-1 rounded-full border border-slate-200 px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                >
+                  <Delete size={14} />
+                  Backspace
+                </button>
+              )}
               <button
                 type="button"
-                onClick={onPauseInput}
-                className="inline-flex h-8 items-center gap-1 rounded-full border border-slate-200 px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                onClick={handleClose}
+                className="hidden h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 sm:flex"
+                aria-label="Lukk piano"
               >
-                <Pause size={14} />
-                Pause
+                <X size={18} />
               </button>
-            )}
-            {onBackspace && (
-              <button
-                type="button"
-                onClick={onBackspace}
-                className="inline-flex h-8 items-center gap-1 rounded-full border border-slate-200 px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-              >
-                <Delete size={14} />
-                Backspace
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={handleClose}
-              className="hidden h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 sm:flex"
-              aria-label="Lukk piano"
-            >
-              <X size={18} />
-            </button>
+            </div>
           </div>
+
+          {durationOptions && durationOptions.length > 0 && onSelectDuration && selectedDuration && (
+            <div className="flex flex-wrap items-center gap-2">
+              {durationOptions.map((duration) => (
+                <button
+                  key={duration}
+                  type="button"
+                  onClick={() => onSelectDuration(duration)}
+                  className={`inline-flex h-8 items-center justify-center rounded-full border px-3 text-xs font-semibold transition ${
+                    selectedDuration === duration
+                      ? 'border-indigo-500 bg-indigo-500 text-white'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                  }`}
+                  aria-pressed={selectedDuration === duration}
+                >
+                  {duration}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div ref={scrollContainerRef} className="overflow-x-auto px-3 pb-6 sm:px-6">
