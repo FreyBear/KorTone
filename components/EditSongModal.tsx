@@ -407,7 +407,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
                   {pitchRows.map((row) => (
                     <div
                       key={row.id}
-                      className="grid grid-cols-[1.1fr_1fr_auto_auto] items-center gap-2"
+                      className="grid grid-cols-1 gap-2 sm:grid-cols-[1.1fr_1fr_auto_auto] sm:items-center"
                     >
                       <input
                         type="text"
@@ -472,28 +472,32 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
           </div>
         </div>
       )}
-      <PianoSheet
-        isOpen={isSequencePianoOpen}
-        onClose={() => setIsSequencePianoOpen(false)}
-        title="Sekvensinput"
-        durationOptions={['8n', '4n', '2n', '1n']}
-        selectedDuration={selectedDuration}
-        onSelectDuration={setSelectedDuration}
-        onNoteInput={(note) => appendSequenceToken(formatSequenceToken(note, selectedDuration))}
-        onBackspace={removeLastSequenceToken}
-        onPauseInput={() => appendSequenceToken(formatSequenceToken('R', selectedDuration))}
-        zIndexClassName="z-[60]"
-      />
-      <PianoSheet
-        isOpen={isPitchPianoOpen}
-        onClose={() => {
-          setIsPitchPianoOpen(false);
-          setPitchTargetRowId(null);
-        }}
-        title="Velg tone for pitch"
-        onNoteInput={handlePitchPianoNote}
-        zIndexClassName="z-[70]"
-      />
+      {isSequencePianoOpen && (
+        <PianoSheet
+          isOpen={isSequencePianoOpen}
+          onClose={() => setIsSequencePianoOpen(false)}
+          title="Sekvensinput"
+          durationOptions={['8n', '4n', '2n', '1n']}
+          selectedDuration={selectedDuration}
+          onSelectDuration={setSelectedDuration}
+          onNoteInput={(note) => appendSequenceToken(formatSequenceToken(note, selectedDuration))}
+          onBackspace={removeLastSequenceToken}
+          onPauseInput={() => appendSequenceToken(formatSequenceToken('R', selectedDuration))}
+          zIndexClassName="z-[60]"
+        />
+      )}
+      {isPitchPianoOpen && (
+        <PianoSheet
+          isOpen={isPitchPianoOpen}
+          onClose={() => {
+            setIsPitchPianoOpen(false);
+            setPitchTargetRowId(null);
+          }}
+          title="Velg tone for pitch"
+          onNoteInput={handlePitchPianoNote}
+          zIndexClassName="z-[70]"
+        />
+      )}
     </>
   );
 }
