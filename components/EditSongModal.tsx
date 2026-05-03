@@ -407,26 +407,26 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
                   {pitchRows.map((row) => (
                     <div
                       key={row.id}
-                      className="grid grid-cols-1 gap-2 sm:grid-cols-[1.1fr_1fr_auto_auto] sm:items-center"
+                      className="flex items-center gap-2 overflow-x-auto pb-1"
                     >
                       <input
                         type="text"
                         value={row.voice}
                         onChange={(e) => updatePitchRow(row.id, 'voice', e.target.value)}
-                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                        placeholder="Stemme (f.eks. S, A, T, B1)"
+                        className="h-10 w-24 shrink-0 rounded-lg border border-slate-300 px-2 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Stemme"
                       />
                       <input
                         type="text"
                         value={row.note}
                         onChange={(e) => updatePitchRow(row.id, 'note', e.target.value)}
-                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                        placeholder="Tone (f.eks. A, F#, Bb)"
+                        className="h-10 w-24 shrink-0 rounded-lg border border-slate-300 px-2 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Tone"
                       />
                       <button
                         type="button"
                         onClick={() => pickPitchWithPiano(row.id)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
                         aria-label="Velg tone med piano"
                         title="Velg tone med piano"
                       >
@@ -435,7 +435,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
                       <button
                         type="button"
                         onClick={() => removePitchRow(row.id)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                         aria-label="Fjern pitch-rad"
                         title="Fjern pitch-rad"
                       >
