@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Edit2, Save, X } from 'lucide-react';
+import { Edit2, Plus, Save, Trash2, X } from 'lucide-react';
 import { PianoIcon, PianoSheet } from '@/components/PianoSheet';
 import type { Song, Voice } from '@/lib/types';
 import { getSupabase } from '@/lib/supabase';
@@ -12,6 +12,51 @@ type EditSongModalProps = {
   isAdmin: boolean;
   onSongUpdated: () => void;
 };
+
+type PitchRow = {
+  id: string;
+  voice: string;
+  note: string;
+};
+
+function normalizeVoiceOrder(voice: string): number {
+  const order = ['S', 'M', 'A', 'T', 'BAR', 'B'];
+  const normalized = voice.trim().toUpperCase();
+  const index = order.findIndex((prefix) => normalized.startsWith(prefix));
+  return index === -1 ? 99 : index;
+}
+
+function getPitchRows(pitches: Partial<Record<Voice, string>>): PitchRow[] {
+  const entries = Object.entries(pitches);
+  entries.sort((a, b) => {
+    const voiceA = a[0] ?? '';
+    const voiceB = b[0] ?? '';
+    const orderA = normalizeVoiceOrder(voiceA);
+    const orderB = normalizeVoiceOrder(voiceB);
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    return voiceA.localeCompare(voiceB);
+  });
+
+  return entries.map(([voice, note], index) => ({
+    id: `${voice}-${index}`,
+    voice,
+    note: note ?? '',
+  }));
+}
+
+function rowsToPitchesObject(rows: PitchRow[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  rows.forEach((row) => {
+    const voice = row.voice.trim();
+    const note = row.note.trim();
+    if (voice && note) {
+      result[voice] = note;
+    }
+  });
+  return result;
+}
 
 // Helper: Sort pitches in musical order (S, A, T, B)
 function sortPitches(pitches: Partial<Record<Voice, string>>): string {
@@ -31,9 +76,12 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSequencePianoOpen, setIsSequencePianoOpen] = useState(false);
+  const [isPitchPianoOpen, setIsPitchPianoOpen] = useState(false);
+  const [pitchTargetRowId, setPitchTargetRowId] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<'8n' | '4n' | '2n' | '1n'>('4n');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
+  const [pitchRows, setPitchRows] = useState<PitchRow[]>(getPitchRows(song.pitches));
   const [formData, setFormData] = useState({
     title: song.title,
     nickname: song.nickname || '',
@@ -41,7 +89,6 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     sequence: song.sequence.join(' '),
     key_signature: song.key_signature || '',
     tempo_bpm: song.tempo_bpm,
-    pitches: sortPitches(song.pitches),
   });
 
   if (!isAdmin) return null;
@@ -60,8 +107,10 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
       sequence: song.sequence.join(' '),
       key_signature: song.key_signature || '',
       tempo_bpm: song.tempo_bpm,
-      pitches: sortPitches(song.pitches),
     });
+    setPitchRows(getPitchRows(song.pitches));
+    setPitchTargetRowId(null);
+    setIsPitchPianoOpen(false);
     setSelectedDuration('4n');
     setIsSequencePianoOpen(false);
     setIsOpen(true);
@@ -69,6 +118,8 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
   function closeModal() {
     setIsSequencePianoOpen(false);
+    setIsPitchPianoOpen(false);
+    setPitchTargetRowId(null);
     setIsOpen(false);
   }
 
@@ -98,6 +149,44 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     });
   }
 
+  function updatePitchRow(rowId: string, key: 'voice' | 'note', value: string) {
+    setPitchRows((current) => current.map((row) => (row.id === rowId ? { ...row, [key]: value } : row)));
+  }
+
+  function addPitchRow() {
+    setPitchRows((current) => [
+      ...current,
+      {
+        id: `pitch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        voice: '',
+        note: '',
+      },
+    ]);
+  }
+
+  function removePitchRow(rowId: string) {
+    setPitchRows((current) => current.filter((row) => row.id !== rowId));
+    if (pitchTargetRowId === rowId) {
+      setPitchTargetRowId(null);
+      setIsPitchPianoOpen(false);
+    }
+  }
+
+  function pickPitchWithPiano(rowId: string) {
+    setPitchTargetRowId(rowId);
+    setIsSequencePianoOpen(false);
+    setIsPitchPianoOpen(true);
+  }
+
+  function handlePitchPianoNote(note: string) {
+    if (!pitchTargetRowId) {
+      return;
+    }
+    updatePitchRow(pitchTargetRowId, 'note', note);
+    setIsPitchPianoOpen(false);
+    setPitchTargetRowId(null);
+  }
+
   async function handleSave() {
     setIsSaving(true);
     try {
@@ -110,16 +199,37 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
 
       // Parse sequence (space-separated notes)
       const sequenceArray = formData.sequence.trim().split(/\s+/).filter(s => s.length > 0);
-      
-      // Parse pitches JSON
-      let pitchesObj;
-      try {
-        pitchesObj = JSON.parse(formData.pitches);
-      } catch (e) {
-        showToast('Ugyldig JSON i pitches-feltet', 'error');
+
+      const incompleteRows = pitchRows.filter((row) => {
+        const hasVoice = row.voice.trim().length > 0;
+        const hasNote = row.note.trim().length > 0;
+        return (hasVoice && !hasNote) || (!hasVoice && hasNote);
+      });
+
+      if (incompleteRows.length > 0) {
+        showToast('Alle pitch-rader må ha både stemme og tone (eller være tomme)', 'error');
         setIsSaving(false);
         return;
       }
+
+      const validRows = pitchRows
+        .map((row) => ({ ...row, voice: row.voice.trim(), note: row.note.trim() }))
+        .filter((row) => row.voice.length > 0 && row.note.length > 0);
+
+      if (validRows.length === 0) {
+        showToast('Legg inn minst én gyldig pitch-rad', 'error');
+        setIsSaving(false);
+        return;
+      }
+
+      const uniqueVoices = new Set(validRows.map((row) => row.voice.toUpperCase()));
+      if (uniqueVoices.size !== validRows.length) {
+        showToast('Samme stemme kan ikke legges inn flere ganger', 'error');
+        setIsSaving(false);
+        return;
+      }
+
+      const pitchesObj = rowsToPitchesObject(validRows);
 
       const { error } = await supabase
         .from('songs')
@@ -279,16 +389,65 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Pitches (JSON med stemme-mapping)
-                </label>
-                <textarea
-                  value={formData.pitches}
-                  onChange={(e) => setFormData({ ...formData, pitches: e.target.value })}
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                  rows={6}
-                  placeholder='{"S":"A","A":"F","T":"A","B":"F"}'
-                />
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Pitches (stemme + tone)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addPitchRow}
+                    className="inline-flex h-8 items-center gap-1 rounded-full border border-slate-200 px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                  >
+                    <Plus size={14} />
+                    Legg til rad
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  {pitchRows.map((row) => (
+                    <div
+                      key={row.id}
+                      className="grid grid-cols-[1.1fr_1fr_auto_auto] items-center gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={row.voice}
+                        onChange={(e) => updatePitchRow(row.id, 'voice', e.target.value)}
+                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Stemme (f.eks. S, A, T, B1)"
+                      />
+                      <input
+                        type="text"
+                        value={row.note}
+                        onChange={(e) => updatePitchRow(row.id, 'note', e.target.value)}
+                        className="rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Tone (f.eks. A, F#, Bb)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => pickPitchWithPiano(row.id)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white shadow-md transition hover:bg-indigo-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
+                        aria-label="Velg tone med piano"
+                        title="Velg tone med piano"
+                      >
+                        <PianoIcon />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removePitchRow(row.id)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        aria-label="Fjern pitch-rad"
+                        title="Fjern pitch-rad"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                  JSON genereres automatisk ved lagring for å unngå ugyldig format.
+                </p>
               </div>
             </div>
 
@@ -324,6 +483,16 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
         onBackspace={removeLastSequenceToken}
         onPauseInput={() => appendSequenceToken(formatSequenceToken('R', selectedDuration))}
         zIndexClassName="z-[60]"
+      />
+      <PianoSheet
+        isOpen={isPitchPianoOpen}
+        onClose={() => {
+          setIsPitchPianoOpen(false);
+          setPitchTargetRowId(null);
+        }}
+        title="Velg tone for pitch"
+        onNoteInput={handlePitchPianoNote}
+        zIndexClassName="z-[70]"
       />
     </>
   );
