@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
+import { PianoIcon, PianoSheet } from '@/components/PianoSheet';
 import type { Song, Voice } from '@/lib/types';
 import { getSupabase } from '@/lib/supabase';
 import { Toast } from '@/components/Toast';
@@ -29,6 +30,7 @@ function sortPitches(pitches: Partial<Record<Voice, string>>): string {
 export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSequencePianoOpen, setIsSequencePianoOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
   const [formData, setFormData] = useState({
@@ -59,7 +61,31 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
       tempo_bpm: song.tempo_bpm,
       pitches: sortPitches(song.pitches),
     });
+    setIsSequencePianoOpen(false);
     setIsOpen(true);
+  }
+
+  function closeModal() {
+    setIsSequencePianoOpen(false);
+    setIsOpen(false);
+  }
+
+  function appendSequenceToken(token: string) {
+    setFormData((current) => ({
+      ...current,
+      sequence: current.sequence.trim() ? `${current.sequence.trim()} ${token}` : token,
+    }));
+  }
+
+  function removeLastSequenceToken() {
+    setFormData((current) => {
+      const tokens = current.sequence.trim().split(/\s+/).filter((token) => token.length > 0);
+      tokens.pop();
+      return {
+        ...current,
+        sequence: tokens.join(' '),
+      };
+    });
   }
 
   async function handleSave() {
@@ -144,7 +170,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
                 Rediger sang
               </h2>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={closeModal}
                 className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <X size={24} />
@@ -190,9 +216,22 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                  Sekvens (space-separerte noter, f.eks. &quot;C4:2n C4 A4:4n R:4n&quot;)
-                </label>
+                <div className="flex items-center justify-between gap-3">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Sekvens (space-separerte noter, f.eks. &quot;C4:2n C4 A4:4n R:4n&quot;)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsSequencePianoOpen((current) => !current)}
+                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white shadow-md transition hover:bg-indigo-500 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 ${
+                      isSequencePianoOpen ? 'bg-indigo-500' : 'bg-indigo-600'
+                    }`}
+                    aria-label={isSequencePianoOpen ? 'Lukk piano for sekvens' : 'Åpne piano for sekvens'}
+                    title="Piano for sekvens"
+                  >
+                    <PianoIcon />
+                  </button>
+                </div>
                 <input
                   type="text"
                   value={formData.sequence}
@@ -255,7 +294,7 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
               </button>
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={closeModal}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Avbryt
@@ -264,6 +303,15 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
           </div>
         </div>
       )}
+      <PianoSheet
+        isOpen={isSequencePianoOpen}
+        onClose={() => setIsSequencePianoOpen(false)}
+        title="Sekvensinput"
+        onNoteInput={appendSequenceToken}
+        onBackspace={removeLastSequenceToken}
+        onPauseInput={() => appendSequenceToken('R')}
+        zIndexClassName="z-[60]"
+      />
     </>
   );
 }
