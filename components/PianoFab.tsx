@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { holdNote, releaseNote, stopAllPlayback } from '@/lib/audio';
 
@@ -101,8 +101,36 @@ export function PianoFab({ onActivated }: PianoFabProps) {
 
   // Refs for drag-to-close gesture (mobile only)
   const panelRef        = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragStartY      = useRef<number | null>(null);
   const dragOffsetY     = useRef<number>(0);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      if (container.scrollWidth <= container.clientWidth) {
+        return;
+      }
+
+      const target = container.querySelector<HTMLButtonElement>('button[data-note="C5"]');
+      if (!target) return;
+
+      const targetCenter = target.offsetLeft + target.offsetWidth / 2;
+      const containerCenter = container.clientWidth / 2;
+      const maxScrollLeft = container.scrollWidth - container.clientWidth;
+      const desiredScrollLeft = Math.max(0, Math.min(targetCenter - containerCenter, maxScrollLeft));
+
+      container.scrollTo({ left: desiredScrollLeft, behavior: 'smooth' });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [isOpen]);
 
   // ── Panel open / close ──────────────────────────────────────────────────────
   function openPanel() {
@@ -198,6 +226,7 @@ export function PianoFab({ onActivated }: PianoFabProps) {
       <button
         key={key.note}
         type="button"
+        data-note={key.note}
         style={{ gridColumn: `${key.col} / span 2` }}
         className={`${baseClasses} ${heightClass} ${key.isHalf ? halfClasses : naturalClasses}`}
         onMouseDown={() => handleKeyPress(key.note)}
@@ -271,7 +300,7 @@ export function PianoFab({ onActivated }: PianoFabProps) {
           </div>
 
           {/* Keys — keep keys large on mobile by allowing horizontal scrolling */}
-          <div className="px-3 pb-6 sm:px-6 overflow-x-auto">
+          <div ref={scrollContainerRef} className="px-3 pb-6 sm:px-6 overflow-x-auto">
             <div className="min-w-[48rem] sm:min-w-0">
             {/* Row 1: half tones (Db, Eb, gap, Gb, Ab, B) */}
             <div
