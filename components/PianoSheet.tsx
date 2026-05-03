@@ -53,6 +53,13 @@ function buildHalfKeys(startOctave: number, endOctave: number): PianoKey[] {
 const NATURAL_KEYS = buildNaturalKeys(START_OCTAVE, END_OCTAVE);
 const HALF_KEYS = buildHalfKeys(START_OCTAVE, END_OCTAVE);
 
+const DURATION_LABELS: Record<'8n' | '4n' | '2n' | '1n', string> = {
+  '1n': '1',
+  '2n': '1/2',
+  '4n': '1/4',
+  '8n': '1/8',
+};
+
 export function PianoIcon() {
   return (
     <svg
@@ -314,8 +321,9 @@ export function PianoSheet({
                       : 'border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
                   }`}
                   aria-pressed={selectedDuration === duration}
+                  aria-label={`Notelengde ${DURATION_LABELS[duration]}`}
                 >
-                  {duration}
+                  {DURATION_LABELS[duration]}
                 </button>
               ))}
             </div>

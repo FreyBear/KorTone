@@ -79,6 +79,13 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
     }));
   }
 
+  function formatSequenceToken(note: string, duration: '8n' | '4n' | '2n' | '1n') {
+    if (duration === '4n') {
+      return note;
+    }
+    return `${note}:${duration}`;
+  }
+
   function removeLastSequenceToken() {
     setFormData((current) => {
       const tokens = current.sequence.trim().split(/\s+/).filter((token) => token.length > 0);
@@ -313,9 +320,9 @@ export function EditSongModal({ song, isAdmin, onSongUpdated }: EditSongModalPro
         durationOptions={['8n', '4n', '2n', '1n']}
         selectedDuration={selectedDuration}
         onSelectDuration={setSelectedDuration}
-        onNoteInput={(note) => appendSequenceToken(`${note}:${selectedDuration}`)}
+        onNoteInput={(note) => appendSequenceToken(formatSequenceToken(note, selectedDuration))}
         onBackspace={removeLastSequenceToken}
-        onPauseInput={() => appendSequenceToken(`R:${selectedDuration}`)}
+        onPauseInput={() => appendSequenceToken(formatSequenceToken('R', selectedDuration))}
         zIndexClassName="z-[60]"
       />
     </>
