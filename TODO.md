@@ -1,7 +1,7 @@
 # KorTone - Status og neste steg
 
 ## Sist oppdatert
-- 2026-04-29
+- 2026-05-03
 
 ## Fullfort nylig
 
@@ -9,6 +9,7 @@
 - [x] Brand oppdatert i header: "Asta La Vista"
 - [x] Mobilvennlig header-layout (kontroller wraper pa sma skjermer)
 - [x] Mork modus-forbedring for lydvelger dropdown (bedre kontrast)
+- [x] `alert()` erstattet med toast-varsler i UI-flyt for oppretting/redigering/admin
 
 ### Roller og administrasjon
 - [x] Stotte for roller: `admin` og `editor`
@@ -38,12 +39,11 @@
 
 ### Hoy prioritet
 - [ ] Legg til slett sang-funksjon (kun admin) med bekreftelsesdialog
-- [ ] Bedre validering i "Ny sang"/"Rediger sang" (sekvensformat, pitches-struktur)
-- [ ] Erstatt `alert()` med toast-varsler for bedre UX
+- [ ] Bedre validering i "Ny sang"/"Rediger sang" (sekvensformat + streng validering av pitches-struktur utover JSON-parse)
 
 ### Medium prioritet
-- [ ] Filter pa stemmetype (`voices`) og toneart
-- [ ] Duplikatsjekk ved oppretting av ny sang (f.eks. tittel + voices)
+- [ ] Egen filter-UI for stemmetype (`voices`) og toneart (fritisok dekker delvis)
+- [ ] Duplikatsjekk ogsa ved redigering av sang (oppretting har allerede sjekk pa tittel + voices)
 - [ ] Forbedret mobilvisning i AdminPanel
 - [ ] Volumkontroll for avspilling
 

@@ -8,6 +8,8 @@ import { SongCard } from '@/components/SongCard';
 import { SoundModeSelect } from '@/components/SoundModeSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { TuningForkFab } from '@/components/TuningForkFab';
+import { PianoFab } from '@/components/PianoFab';
+import { stopAllPlayback } from '@/lib/audio';
 import { AdminPanel } from '@/components/AdminPanel';
 import { Shield } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
@@ -236,6 +238,7 @@ export default function Home() {
         ))}
       </section>
 
+      <PianoFab onActivated={stopAllPlayback} />
       <TuningForkFab />
       <AdminPanel isOpen={adminPanelOpen} onClose={() => setAdminPanelOpen(false)} />
     </main>

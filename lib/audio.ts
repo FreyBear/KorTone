@@ -24,6 +24,7 @@ const instrumentPromises: Partial<Record<SoundMode, Promise<PlayableInstrument>>
 const DEFAULT_SEQUENCE_DURATION = '4n';
 let metronomeRunning = false;
 let localPianoAvailablePromise: Promise<boolean> | null = null;
+let sequenceCancelled = false;
 
 export function getSoundMode(): SoundMode {
   return currentSoundMode;
@@ -263,12 +264,14 @@ export async function playSequence(
   }
 ): Promise<void> {
   await primeAudioContext();
+  sequenceCancelled = false;
 
   const quarterMs = tempoBpm && tempoBpm > 0 ? 60_000 / tempoBpm : 500;
   const instrument = await getInstrument();
 
   try {
     for (const token of sequence) {
+      if (sequenceCancelled) break;
       const { noteToken, duration, isRest } = parseSequenceToken(token);
       const waitMs = Math.max(1, Math.round(durationToBeats(duration) * quarterMs));
 
@@ -293,6 +296,34 @@ export async function holdTuningForkA(): Promise<void> {
 export async function releaseTuningForkA(): Promise<void> {
   const instrument = await getInstrument();
   instrument.triggerRelease('A4');
+}
+
+/**
+ * Hold a specific note (used by the piano panel).
+ * toneJsNote must be a valid Tone.js note string (e.g. 'C4', 'Bb4').
+ */
+export async function holdNote(toneJsNote: string): Promise<void> {
+  await primeAudioContext();
+  const instrument = await getInstrument();
+  instrument.triggerAttack(toneJsNote);
+}
+
+/**
+ * Release a specific note held by the piano panel.
+ */
+export async function releaseNote(toneJsNote: string): Promise<void> {
+  const instrument = await getInstrument();
+  instrument.triggerRelease(toneJsNote);
+}
+
+/**
+ * Stop sequences, metronome, and tuning fork without affecting piano notes.
+ * Called when the piano panel is opened.
+ */
+export function stopAllPlayback(): void {
+  sequenceCancelled = true;
+  stopMetronome();
+  void releaseTuningForkA();
 }
 
 export async function startMetronome(tempoBpm: number): Promise<void> {
