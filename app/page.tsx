@@ -11,7 +11,7 @@ import { TuningForkFab } from '@/components/TuningForkFab';
 import { AdminPanel } from '@/components/AdminPanel';
 import { Shield } from 'lucide-react';
 import type { Session } from '@supabase/supabase-js';
-import { setSoundMode } from '@/lib/audio';
+import { installAudioWarmupOnFirstGesture, preloadCurrentInstrument, setSoundMode } from '@/lib/audio';
 import { fallbackSongs } from '@/lib/songData';
 import { hasSupabaseEnv, getSupabase } from '@/lib/supabase';
 import type { Song, SoundMode } from '@/lib/types';
@@ -52,6 +52,7 @@ export default function Home() {
   useEffect(() => {
     setSoundMode(soundMode);
     window.localStorage.setItem(soundStorageKey, soundMode);
+    void preloadCurrentInstrument();
   }, [soundMode]);
 
   async function fetchAndSetSongs() {
@@ -83,9 +84,11 @@ export default function Home() {
     const timeoutId = window.setTimeout(() => {
       void fetchAndSetSongs();
     }, 0);
+    const removeWarmupListeners = installAudioWarmupOnFirstGesture();
 
     return () => {
       window.clearTimeout(timeoutId);
+      removeWarmupListeners();
     };
   }, []);
 
