@@ -5,8 +5,13 @@ import { X } from 'lucide-react';
 import { holdNote, releaseNote, stopAllPlayback } from '@/lib/audio';
 
 // ─── Octave configuration ─────────────────────────────────────────────────────
-// Change OCTAVE to shift the entire keyboard range (e.g. 3 for C3–B3).
-const OCTAVE = 4;
+// Keep range configurable for future tweaks without changing rendering logic.
+const START_OCTAVE = 4;
+const END_OCTAVE = 5;
+
+const TOTAL_OCTAVES = END_OCTAVE - START_OCTAVE + 1;
+const GRID_COLUMNS_PER_OCTAVE = 14;
+const TOTAL_GRID_COLUMNS = TOTAL_OCTAVES * GRID_COLUMNS_PER_OCTAVE;
 
 // ─── Key definitions ──────────────────────────────────────────────────────────
 // Norwegian note system:
@@ -21,30 +26,44 @@ type PianoKey = {
   col: number;     // Grid column start (1-indexed, 14-column grid)
 };
 
-// Natural tones — bottom row
-const NATURAL_KEYS: PianoKey[] = [
-  { label: `C${OCTAVE}`,  note: `C${OCTAVE}`,  isHalf: false, col: 1  },
-  { label: `D${OCTAVE}`,  note: `D${OCTAVE}`,  isHalf: false, col: 3  },
-  { label: `E${OCTAVE}`,  note: `E${OCTAVE}`,  isHalf: false, col: 5  },
-  { label: `F${OCTAVE}`,  note: `F${OCTAVE}`,  isHalf: false, col: 7  },
-  { label: `G${OCTAVE}`,  note: `G${OCTAVE}`,  isHalf: false, col: 9  },
-  { label: `A${OCTAVE}`,  note: `A${OCTAVE}`,  isHalf: false, col: 11 },
-  // H in Norwegian = B in international (Tone.js)
-  { label: `H${OCTAVE}`,  note: `B${OCTAVE}`,  isHalf: false, col: 13 },
-];
+function buildNaturalKeys(startOctave: number, endOctave: number): PianoKey[] {
+  const keys: PianoKey[] = [];
+  for (let octave = startOctave; octave <= endOctave; octave += 1) {
+    const offset = (octave - startOctave) * GRID_COLUMNS_PER_OCTAVE;
+    keys.push(
+      { label: `C${octave}`, note: `C${octave}`, isHalf: false, col: offset + 1 },
+      { label: `D${octave}`, note: `D${octave}`, isHalf: false, col: offset + 3 },
+      { label: `E${octave}`, note: `E${octave}`, isHalf: false, col: offset + 5 },
+      { label: `F${octave}`, note: `F${octave}`, isHalf: false, col: offset + 7 },
+      { label: `G${octave}`, note: `G${octave}`, isHalf: false, col: offset + 9 },
+      { label: `A${octave}`, note: `A${octave}`, isHalf: false, col: offset + 11 },
+      // H in Norwegian = B in international (Tone.js)
+      { label: `H${octave}`, note: `B${octave}`, isHalf: false, col: offset + 13 },
+    );
+  }
+  return keys;
+}
 
-// Half tones — top row (b-names only in Norwegian)
-// Positions are offset so Db sits between C and D, Eb between D and E, etc.
-const HALF_KEYS: PianoKey[] = [
-  { label: `Db${OCTAVE}`, note: `Db${OCTAVE}`, isHalf: true, col: 2  },
-  { label: `Eb${OCTAVE}`, note: `Eb${OCTAVE}`, isHalf: true, col: 4  },
-  // No half tone between E and F → col 6 intentionally empty
-  { label: `Gb${OCTAVE}`, note: `Gb${OCTAVE}`, isHalf: true, col: 8  },
-  { label: `Ab${OCTAVE}`, note: `Ab${OCTAVE}`, isHalf: true, col: 10 },
-  // B in Norwegian = Bb in international (Tone.js)
-  { label: `B${OCTAVE}`,  note: `Bb${OCTAVE}`, isHalf: true, col: 12 },
-  // No half tone above H → col 14 intentionally empty
-];
+function buildHalfKeys(startOctave: number, endOctave: number): PianoKey[] {
+  const keys: PianoKey[] = [];
+  for (let octave = startOctave; octave <= endOctave; octave += 1) {
+    const offset = (octave - startOctave) * GRID_COLUMNS_PER_OCTAVE;
+    keys.push(
+      { label: `Db${octave}`, note: `Db${octave}`, isHalf: true, col: offset + 2 },
+      { label: `Eb${octave}`, note: `Eb${octave}`, isHalf: true, col: offset + 4 },
+      // No half tone between E and F → col 6 intentionally empty
+      { label: `Gb${octave}`, note: `Gb${octave}`, isHalf: true, col: offset + 8 },
+      { label: `Ab${octave}`, note: `Ab${octave}`, isHalf: true, col: offset + 10 },
+      // B in Norwegian = Bb in international (Tone.js)
+      { label: `B${octave}`, note: `Bb${octave}`, isHalf: true, col: offset + 12 },
+      // No half tone above H → col 14 intentionally empty
+    );
+  }
+  return keys;
+}
+
+const NATURAL_KEYS = buildNaturalKeys(START_OCTAVE, END_OCTAVE);
+const HALF_KEYS = buildHalfKeys(START_OCTAVE, END_OCTAVE);
 
 // ─── Piano icon ───────────────────────────────────────────────────────────────
 function PianoIcon() {
@@ -235,7 +254,7 @@ export function PianoFab({ onActivated }: PianoFabProps) {
           {/* Header */}
           <div className="flex items-center justify-between px-4 pb-2">
             <span className="text-sm font-medium text-slate-500 dark:text-slate-400 select-none">
-              Piano — C{OCTAVE}–H{OCTAVE}
+              Piano — C{START_OCTAVE}–H{END_OCTAVE} (C5 i midten)
             </span>
             {/* Close button — visible on desktop/tablet */}
             <button
@@ -251,12 +270,13 @@ export function PianoFab({ onActivated }: PianoFabProps) {
             </button>
           </div>
 
-          {/* Keys — 14-column grid preserving piano intervals */}
-          <div className="px-3 pb-6 sm:px-6">
+          {/* Keys — keep keys large on mobile by allowing horizontal scrolling */}
+          <div className="px-3 pb-6 sm:px-6 overflow-x-auto">
+            <div className="min-w-[48rem] sm:min-w-0">
             {/* Row 1: half tones (Db, Eb, gap, Gb, Ab, B) */}
             <div
               className="grid mb-1"
-              style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))', gap: '3px' }}
+              style={{ gridTemplateColumns: `repeat(${TOTAL_GRID_COLUMNS}, minmax(0, 1fr))`, gap: '3px' }}
             >
               {HALF_KEYS.map(renderKey)}
             </div>
@@ -264,9 +284,10 @@ export function PianoFab({ onActivated }: PianoFabProps) {
             {/* Row 2: natural tones (C, D, E, F, G, A, H) */}
             <div
               className="grid"
-              style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))', gap: '3px' }}
+              style={{ gridTemplateColumns: `repeat(${TOTAL_GRID_COLUMNS}, minmax(0, 1fr))`, gap: '3px' }}
             >
               {NATURAL_KEYS.map(renderKey)}
+            </div>
             </div>
           </div>
         </div>
