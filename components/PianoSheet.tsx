@@ -80,6 +80,13 @@ type PianoSheetProps = {
   onActivated?: () => void;
   title?: string;
   onNoteInput?: (noteToken: string) => void;
+  onNoteDurationInput?: (payload: {
+    interactionId: number;
+    note: string;
+    duration: '4n' | '2n' | '1n';
+    isUpdate: boolean;
+  }) => void;
+  onNoteDurationEnd?: (interactionId: number) => void;
   onBackspace?: () => void;
   onPauseInput?: () => void;
   zIndexClassName?: string;
@@ -91,6 +98,8 @@ export function PianoSheet({
   onActivated,
   title = `Piano — C${START_OCTAVE}–H${END_OCTAVE} (C5 i midten)`,
   onNoteInput,
+  onNoteDurationInput,
+  onNoteDurationEnd,
   onBackspace,
   onPauseInput,
   zIndexClassName = 'z-40',
@@ -100,10 +109,33 @@ export function PianoSheet({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number | null>(null);
   const dragOffsetY = useRef(0);
+  const interactionCounterRef = useRef(0);
+  const noteInteractionRef = useRef<Map<string, number>>(new Map());
+  const noteTimersRef = useRef<Map<string, { half: number; whole: number }>>(new Map());
+
+  function clearNoteTimers(note: string) {
+    const timers = noteTimersRef.current.get(note);
+    if (!timers) {
+      return;
+    }
+    window.clearTimeout(timers.half);
+    window.clearTimeout(timers.whole);
+    noteTimersRef.current.delete(note);
+  }
+
+  function resetInteractionState() {
+    noteTimersRef.current.forEach((timers) => {
+      window.clearTimeout(timers.half);
+      window.clearTimeout(timers.whole);
+    });
+    noteTimersRef.current.clear();
+    noteInteractionRef.current.clear();
+  }
 
   useEffect(() => {
     if (!isOpen) {
       setActiveNotes(new Set());
+      resetInteractionState();
       return;
     }
 
@@ -134,6 +166,7 @@ export function PianoSheet({
 
   function handleClose() {
     setActiveNotes(new Set());
+    resetInteractionState();
     if (panelRef.current) {
       panelRef.current.style.transform = '';
     }
@@ -148,7 +181,48 @@ export function PianoSheet({
     stopAllPlayback();
     onActivated?.();
     await holdNote(note);
-    onNoteInput?.(note);
+
+    if (onNoteDurationInput) {
+      interactionCounterRef.current += 1;
+      const interactionId = interactionCounterRef.current;
+      noteInteractionRef.current.set(note, interactionId);
+
+      onNoteDurationInput({
+        interactionId,
+        note,
+        duration: '4n',
+        isUpdate: false,
+      });
+
+      const halfTimer = window.setTimeout(() => {
+        if (noteInteractionRef.current.get(note) !== interactionId) {
+          return;
+        }
+        onNoteDurationInput({
+          interactionId,
+          note,
+          duration: '2n',
+          isUpdate: true,
+        });
+      }, 350);
+
+      const wholeTimer = window.setTimeout(() => {
+        if (noteInteractionRef.current.get(note) !== interactionId) {
+          return;
+        }
+        onNoteDurationInput({
+          interactionId,
+          note,
+          duration: '1n',
+          isUpdate: true,
+        });
+      }, 900);
+
+      noteTimersRef.current.set(note, { half: halfTimer, whole: wholeTimer });
+    } else {
+      onNoteInput?.(note);
+    }
+
     setActiveNotes((prev) => new Set(prev).add(note));
   }
 
@@ -158,6 +232,14 @@ export function PianoSheet({
     }
 
     await releaseNote(note);
+    clearNoteTimers(note);
+
+    const interactionId = noteInteractionRef.current.get(note);
+    if (interactionId !== undefined) {
+      onNoteDurationEnd?.(interactionId);
+      noteInteractionRef.current.delete(note);
+    }
+
     setActiveNotes((prev) => {
       const next = new Set(prev);
       next.delete(note);
