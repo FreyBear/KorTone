@@ -13,6 +13,7 @@
 - Avspilling av enkelttoner per stemme.
 - Avspilling av sekvens per sang.
 - Stemmegaffel (A4) via flytende knapp.
+- Flytende piano via egen knapp for referansetoner (to oktaver, C4-H5).
 - Mork/lys modus.
 - Google-innlogging med roller (`admin`, `editor`).
 - Opprette og redigere sanger i UI for roller med redigeringsrett.
@@ -40,7 +41,23 @@
 - `R`/`REST` representerer pause.
 - Duration-notasjon folger Tone.js (f.eks. `1n`, `2n`, `4n`, `8n`, `4n.`, `8t`).
 
-### 3.4 Roller
+### 3.4 Piano og noteinput
+- Flytende piano skal kunne spille referansetoner med norsk notasjon og flere samtidige toner.
+- Piano skal bruke samme aktive lydmodus som resten av appen.
+- I `Rediger sang` skal sekvensfeltet kunne fylles via et eget piano-panel.
+- Piano-input i `Rediger sang` skal legge noter bakerst i sekvensen med valgt notelengde.
+- Standard valgt notelengde i sekvens-piano er `1/4` (`4n`).
+- Ved valgt `1/4` lagres noten uten eksplisitt `:4n`.
+- `Pause` i sekvens-piano skal legge til `R` eller `R:DURATION` avhengig av valgt notelengde.
+
+### 3.5 Pitches-redigering
+- `pitches` lagres som `jsonb` i databasen.
+- I `Rediger sang` skal brukeren redigere pitches via en strukturert liste med radene `stemme` + `tone`.
+- UI skal forhindre halvutfylte rader.
+- UI skal forhindre dupliserte stemmer.
+- UI kan bruke piano til a velge tone for en pitch-rad.
+
+### 3.6 Roller
 - `admin`:
   - Kan opprette/redigere sanger
   - Kan administrere brukere og roller
@@ -84,6 +101,8 @@
 - Tap-targets minimum 44x44 px.
 - Headerkontroller skal ikke skape horisontal overflow pa mobil.
 - Dropdowns i dark mode skal ha god kontrast.
+- Redigeringsflyter skal prioritere strukturerte inputflater framfor fri JSON der dette reduserer feil.
+- Flytende paneler/bottom sheets skal ikke skape blank skjerm eller ustabil rendering pa mobil ved orienteringsbytte.
 
 ## 8. Deploykrav
 - Statisk eksport via Next.js build.
@@ -94,6 +113,8 @@
 - Bruker finner sanger raskt via sok.
 - Bruker kan spille av alle relevante stemmer for en sang (inkl. nummererte stemmer).
 - Sekvenser med blandede notelengder spilles korrekt.
+- Bruker kan spille referansetoner via flytende piano.
+- Editor/admin kan fylle sekvens via piano-input i `Rediger sang`.
 - Editor/admin kan opprette ny sang fra UI.
 - Admin kan tildele/fjerne roller.
 - Losningen er tilgjengelig pa ingve.com etter deploy.

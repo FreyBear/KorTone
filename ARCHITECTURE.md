@@ -28,6 +28,8 @@ KorTone er en statisk Next.js-applikasjon hostet pa one.com, med Supabase for au
 - [components/EditSongModal.tsx](components/EditSongModal.tsx): oppdatering av eksisterende sang
 - [components/AddSongModal.tsx](components/AddSongModal.tsx): oppretting av ny sang
 - [components/AdminPanel.tsx](components/AdminPanel.tsx): rolleadministrasjon
+- [components/PianoFab.tsx](components/PianoFab.tsx): flytende piano-knapp pa hovedsiden
+- [components/PianoSheet.tsx](components/PianoSheet.tsx): delt bottom-sheet for piano UI og noteinput
 
 ## Tilgangsmodell
 
@@ -63,6 +65,19 @@ Frontend sjekker `is_admin()` og `can_edit_songs()` og har fallback til admin-ch
 - Manglende duration -> `4n`
 - Rest tokens: `R`/`REST`
 - Duration notasjon folger Tone.js (`1n`, `2n`, `4n`, `8n`, `4n.`, `8t`)
+
+## Redigeringsarkitektur
+
+### Sekvenseditor
+- `EditSongModal` har et eget sekvens-piano som gjenbruker `PianoSheet`.
+- Notelengde styres eksplisitt via UI-knapper (`1`, `1/2`, `1/4`, `1/8`).
+- Ved valgt `1/4` lagres sekvenstoken uten `:4n` for a matche standardformatet i systemet.
+
+### Pitches-editor
+- `EditSongModal` bruker en strukturert radmodell (`stemme`, `tone`) i stedet for fri JSON-redigering.
+- Rader konverteres til `Record<string, string>` ved lagring.
+- UI validerer halvutfylte rader, tom pitch-liste og dupliserte stemmer før update mot Supabase.
+- Tonevalg for pitch-rader kan settes via gjenbrukt `PianoSheet`.
 
 ## Deployflyt
 1. Push til `main` trigger workflow.

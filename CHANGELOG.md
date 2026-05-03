@@ -1,5 +1,22 @@
 # KorTone - Endringslogg
 
+## [2026-05-03]
+
+### Lagt til
+- Flytende piano pa hovedsiden med to oktaver, norsk notasjon og støtte for flere samtidige toner.
+- Gjenbrukbar `PianoSheet`-komponent for piano UI i flere deler av appen.
+- Sekvens-piano i `Rediger sang` med notelengdevelger, `Backspace` og `Pause`.
+- Strukturert pitches-editor i `Rediger sang` med rader for stemme og tone.
+- Piano-basert tonevalg for pitches i `Rediger sang`.
+
+### Endret
+- Notelengdevelger i sekvens-piano viser brokformat (`1`, `1/2`, `1/4`, `1/8`) i stedet for Tone.js-notasjon.
+- Ved valgt `1/4` lagres sekvenstoken uten eksplisitt `:4n` fordi dette er standard i systemet.
+- Pitch-rader i `Rediger sang` er gjort mer kompakte og plassert pa en linje.
+
+### Fikset
+- Ustabil mobil-rendering i `Rediger sang` ved skjulte/faste piano-paneler og orienteringsbytte.
+
 ## [2026-04-29]
 
 ### Lagt til

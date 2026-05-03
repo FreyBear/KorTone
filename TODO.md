@@ -10,6 +10,9 @@
 - [x] Mobilvennlig header-layout (kontroller wraper pa sma skjermer)
 - [x] Mork modus-forbedring for lydvelger dropdown (bedre kontrast)
 - [x] `alert()` erstattet med toast-varsler i UI-flyt for oppretting/redigering/admin
+- [x] Flytende piano med to oktaver og norsk notasjon pa hovedsiden
+- [x] Sekvensinput med piano i `Rediger sang` (notelengdevelger, `Backspace`, `Pause`)
+- [x] Strukturert pitches-editor i `Rediger sang` (stemme/tone-rader i stedet for fri JSON)
 
 ### Roller og administrasjon
 - [x] Stotte for roller: `admin` og `editor`
@@ -39,7 +42,7 @@
 
 ### Hoy prioritet
 - [ ] Legg til slett sang-funksjon (kun admin) med bekreftelsesdialog
-- [ ] Bedre validering i "Ny sang"/"Rediger sang" (sekvensformat + streng validering av pitches-struktur utover JSON-parse)
+- [ ] Bedre validering i "Ny sang"/"Rediger sang" (sekvensformat + strukturert pitches-editor/validering ogsa i `Ny sang`)
 
 ### Medium prioritet
 - [ ] Egen filter-UI for stemmetype (`voices`) og toneart (fritisok dekker delvis)

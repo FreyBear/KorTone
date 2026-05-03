@@ -10,6 +10,7 @@ Digital stemmegaffel for kor med Supabase-backend og statisk deploy til one.com.
 - Dynamiske stemmeknapper basert pa `pitches`
 - Naturlig stemmerekkefolge (S1 -> ... -> B)
 - Sekvensavspilling med notelengder, f.eks. `C4:2n A4:4n R:4n`
+- Flytende piano-knapp med to oktaver (C4-H5), norsk notasjon og flere samtidige toner
 - Flere lydmoduser:
   - Flygel (Sampler)
   - Stryk-pad
@@ -20,6 +21,11 @@ Digital stemmegaffel for kor med Supabase-backend og statisk deploy til one.com.
 - Google-innlogging med roller:
   - `admin`: bruker- og rolleadministrasjon + sangredigering
   - `editor`: sangredigering + oppretting av nye sanger
+- Sekvensredigering med piano i `Rediger sang`:
+  - notepanel fra bunnen
+  - varighetsvelger (`1`, `1/2`, `1/4`, `1/8`)
+  - `Backspace` og `Pause`
+- Strukturert pitches-editor i `Rediger sang` med stemme/tone-rader og sikker JSON-generering
 
 ## Teknologi
 - Next.js 16 (App Router, statisk eksport)
@@ -96,6 +102,8 @@ Eksempel:
   "B": "F"
 }
 ```
+
+I databasen lagres `pitches` fortsatt som JSON, men i `Rediger sang` redigeres dette via en strukturert liste med egne felt for stemme og tone. UI genererer JSON automatisk ved lagring for a unnga ugyldig format.
 
 ## Deploy
 Deploy skjer automatisk via GitHub Actions ved push til `main`.
