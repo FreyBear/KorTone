@@ -118,28 +118,41 @@ export function SongCard({ song, isAdmin = false, onSongUpdated }: SongCardProps
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={handlePlaySequence}
-          disabled={isPlayingSequence}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-75 sm:w-auto"
-        >
-          <Play size={14} />
-          {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
-        </button>
-        {song.tempo_bpm && song.tempo_bpm > 0 && (
+        {song.tempo_bpm && song.tempo_bpm > 0 ? (
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={handleMetronome}
+              className={`inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition sm:text-sm ${
+                isMetronomeActive
+                  ? 'bg-orange-500 text-white hover:bg-orange-600'
+                  : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
+              }`}
+              title={`Metronom: ${song.tempo_bpm} BPM`}
+            >
+              <Music size={14} />
+              {isMetronomeActive ? 'Metronom av' : 'Metronom'}
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePlaySequence}
+              disabled={isPlayingSequence}
+              className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-75 sm:text-sm"
+            >
+              <Play size={14} />
+              {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
-            onClick={handleMetronome}
-            className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
-              isMetronomeActive
-                ? 'bg-orange-500 text-white hover:bg-orange-600'
-                : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800'
-            }`}
-            title={`Metronom: ${song.tempo_bpm} BPM`}
+            onClick={handlePlaySequence}
+            disabled={isPlayingSequence}
+            className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-75 sm:w-auto sm:text-sm"
           >
-            <Music size={14} />
-            {isMetronomeActive ? 'Metronom av' : 'Metronom'}
+            <Play size={14} />
+            {isPlayingSequence ? 'Spiller...' : 'Spill sekvens'}
           </button>
         )}
       </div>
