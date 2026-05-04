@@ -15,7 +15,15 @@ const GRAND_PIANO_URLS: Record<string, string> = {
   A4: 'A4.mp3',
 };
 
+const KEVIN_VOCAL_URLS: Record<string, string> = {
+  C4: 'C4.mp3',
+  'D#4': 'Ds4.mp3',
+  'F#4': 'Fs4.mp3',
+  A4: 'A4.mp3',
+};
+
 const LOCAL_GRAND_PIANO_BASE_URL = '/audio/piano-lite/';
+const LOCAL_KEVIN_VOCAL_BASE_URL = '/audio/Kevin/';
 const REMOTE_GRAND_PIANO_BASE_URL = 'https://tonejs.github.io/audio/salamander/';
 
 let tonePromise: Promise<ToneModule> | null = null;
@@ -23,7 +31,8 @@ let currentSoundMode: SoundMode = 'grandPiano';
 const instrumentPromises: Partial<Record<SoundMode, Promise<PlayableInstrument>>> = {};
 const DEFAULT_SEQUENCE_DURATION = '4n';
 let metronomeRunning = false;
-let localPianoAvailablePromise: Promise<boolean> | null = null;
+let localGrandPianoAvailablePromise: Promise<boolean> | null = null;
+let localKevinVocalAvailablePromise: Promise<boolean> | null = null;
 let sequenceCancelled = false;
 
 export function getSoundMode(): SoundMode {
@@ -79,10 +88,27 @@ async function createInstrument(mode: SoundMode): Promise<PlayableInstrument> {
   const Tone = await getTone();
 
   if (mode === 'grandPiano') {
-    const localPianoAvailable = await canUseLocalPianoSamples();
+    const localGrandPianoAvailable = await canUseLocalGrandPianoSamples();
     const sampler = new Tone.Sampler({
       urls: GRAND_PIANO_URLS,
-      baseUrl: localPianoAvailable ? LOCAL_GRAND_PIANO_BASE_URL : REMOTE_GRAND_PIANO_BASE_URL,
+      baseUrl: localGrandPianoAvailable ? LOCAL_GRAND_PIANO_BASE_URL : REMOTE_GRAND_PIANO_BASE_URL,
+      release: 1,
+    }).toDestination();
+
+    await Tone.loaded();
+    return sampler as PlayableInstrument;
+  }
+
+  if (mode === 'kevinVocal') {
+    const localKevinVocalAvailable = await canUseLocalKevinVocalSamples();
+    if (!localKevinVocalAvailable) {
+      // Keep UX robust: if Kevin samples are not present, fall back to grand piano.
+      return createInstrument('grandPiano');
+    }
+
+    const sampler = new Tone.Sampler({
+      urls: KEVIN_VOCAL_URLS,
+      baseUrl: LOCAL_KEVIN_VOCAL_BASE_URL,
       release: 1,
     }).toDestination();
 
@@ -135,11 +161,11 @@ async function getInstrument(): Promise<PlayableInstrument> {
   return instrumentPromises[mode] as Promise<PlayableInstrument>;
 }
 
-async function canUseLocalPianoSamples(): Promise<boolean> {
+async function canUseLocalGrandPianoSamples(): Promise<boolean> {
   ensureBrowser();
 
-  if (!localPianoAvailablePromise) {
-    localPianoAvailablePromise = fetch(`${LOCAL_GRAND_PIANO_BASE_URL}${GRAND_PIANO_URLS.C4}`, {
+  if (!localGrandPianoAvailablePromise) {
+    localGrandPianoAvailablePromise = fetch(`${LOCAL_GRAND_PIANO_BASE_URL}${GRAND_PIANO_URLS.C4}`, {
       method: 'HEAD',
       cache: 'force-cache',
     })
@@ -147,7 +173,22 @@ async function canUseLocalPianoSamples(): Promise<boolean> {
       .catch(() => false);
   }
 
-  return localPianoAvailablePromise;
+  return localGrandPianoAvailablePromise;
+}
+
+async function canUseLocalKevinVocalSamples(): Promise<boolean> {
+  ensureBrowser();
+
+  if (!localKevinVocalAvailablePromise) {
+    localKevinVocalAvailablePromise = fetch(`${LOCAL_KEVIN_VOCAL_BASE_URL}${KEVIN_VOCAL_URLS.C4}`, {
+      method: 'HEAD',
+      cache: 'force-cache',
+    })
+      .then((response) => response.ok)
+      .catch(() => false);
+  }
+
+  return localKevinVocalAvailablePromise;
 }
 
 async function toNote(value: string | undefined, fallbackMidi: number): Promise<string> {

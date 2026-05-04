@@ -13,6 +13,7 @@ Digital stemmegaffel for kor med Supabase-backend og statisk deploy til one.com.
 - Flytende piano-knapp med to oktaver (C4-H5), norsk notasjon og flere samtidige toner
 - Flere lydmoduser:
   - Flygel (Sampler)
+  - Kevin (Vokal-sampler)
   - Stryk-pad
   - Elpiano
   - Orgel
@@ -128,6 +129,9 @@ Workflow:
 - [supabase](supabase)
 - [scripts](scripts)
 - [data](data)
+
+## Nyttig dokumentasjon
+- [Egne lydfiler for Kevin (Vokal-sampler)](docs/CUSTOM_AUDIO_GUIDE.md)
 
 ## Lisens
 Privat prosjekt (FreyBear).

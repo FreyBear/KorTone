@@ -35,6 +35,10 @@ function resolveInitialSoundMode(): SoundMode {
     return 'stringsPad';
   }
 
+  if (saved === 'kevin' || saved === 'kevinVocal') {
+    return 'kevinVocal';
+  }
+
   if (saved === 'electricPiano' || saved === 'sine' || saved === 'organ') {
     return saved;
   }
